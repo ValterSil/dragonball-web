@@ -1,8 +1,5 @@
 // js/auth.js
 
-// NÃO use import/export neste arquivo!
-// O firebase já está disponível globalmente pelo CDN
-
 const auth = firebase.auth();
 const db = firebase.firestore();
 
@@ -11,7 +8,6 @@ const loginForm = document.getElementById('login-form');
 const messageEl = document.getElementById('auth-message');
 const logoutBtn = document.getElementById('logout-button');
 
-// Função para salvar perfil básico no Firestore
 function saveUserProfile(uid, email) {
   return db.collection("users").doc(uid).set({
     email: email,
@@ -23,7 +19,6 @@ function saveUserProfile(uid, email) {
   }).catch(err => console.error("Erro ao salvar perfil: ", err));
 }
 
-// Cadastro
 if (registerForm) {
   registerForm.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -31,11 +26,9 @@ if (registerForm) {
 
     const email = document.getElementById('register-email').value;
     const password = document.getElementById('register-password').value;
-    
+
     auth.createUserWithEmailAndPassword(email, password)
-      .then(userCredential => {
-        return saveUserProfile(userCredential.user.uid, email);
-      })
+      .then(userCredential => saveUserProfile(userCredential.user.uid, email))
       .then(() => {
         messageEl.textContent = `Cadastro realizado! Bem vindo, ${email}`;
         messageEl.className = 'text-green-400';
@@ -48,7 +41,6 @@ if (registerForm) {
   });
 }
 
-// Login
 if (loginForm) {
   loginForm.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -70,7 +62,6 @@ if (loginForm) {
   });
 }
 
-// Logout
 if (logoutBtn) {
   logoutBtn.addEventListener('click', () => {
     auth.signOut()
@@ -85,7 +76,6 @@ if (logoutBtn) {
   });
 }
 
-// Detecta mudança na autenticação e pode atualizar UI / carregar dados
 auth.onAuthStateChanged(user => {
   if (user) {
     console.log("Usuário logado:", user.email);
@@ -96,7 +86,7 @@ auth.onAuthStateChanged(user => {
         if (userDoc.exists) {
           const data = userDoc.data();
           console.log("Dados do perfil:", data);
-          // Atualize seu frontend exibindo dados (nome, level, zeni etc)
+          // Atualize frontend aqui
         }
       });
   } else {
