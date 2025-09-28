@@ -12,15 +12,16 @@ function showAuthForms() {
   registerForm.style.display = 'block';
   loginForm.style.display = 'block';
   logoutBtn.style.display = 'none';
-  mainContent.querySelector('p.text-center')?.classList.add('hidden');
+  document.getElementById('loading-message').style.display = 'none';
 }
 
 function showGameContent() {
   registerForm.style.display = 'none';
   loginForm.style.display = 'none';
   logoutBtn.style.display = 'block';
-  mainContent.querySelector('p.text-center')?.classList.remove('hidden');
+  document.getElementById('loading-message').style.display = 'block';
 }
+
 
 // Inicialmente mostrar formulários
 showAuthForms();
