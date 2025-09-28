@@ -1,0 +1,41 @@
+<div id="status-screen" class="view-content">
+    <h3 class="view-title">Status do Personagem</h3>
+    <div id="player-stats-display" class="w-full max-w-lg bg-gray-800 p-6 rounded-lg shadow-md space-y-2 text-gray-200">
+        <p><strong>Nome:</strong> <span id="stats-name-display">-</span></p>
+        <p><strong>Raça:</strong> <span id="stats-race-display">-</span></p>
+        <p><strong>Nível:</strong> <span id="stats-level-display">-</span></p>
+        <p><strong>XP:</strong> <span id="stats-xp-display">-</span></p>
+        <p><strong>Poder de Luta:</strong> <span id="stats-power-display">-</span></p>
+        <p><strong>Defesa:</strong> <span id="stats-defense-display">-</span></p>
+        
+        <!-- BARRAS DE VIDA E KI -->
+        <div class="mt-4 border-t border-gray-600 pt-2">
+            <div class="text-sm">HP: <span id="stats-health-display">100/100</span></div>
+            <div class="w-full bg-gray-700 rounded-full h-3">
+                <div id="stats-health-bar" class="bg-green-500 h-3 rounded-full transition-all duration-300" style="width: 100%;"></div>
+            </div>
+        </div>
+        <div>
+            <div class="text-sm">KI: <span id="stats-ki-display">100/100</span></div>
+            <div class="w-full bg-gray-700 rounded-full h-3">
+                <div id="stats-ki-bar" class="bg-blue-500 h-3 rounded-full transition-all duration-300" style="width: 100%;"></div>
+            </div>
+        </div>
+        
+        <p><strong>Zeni:</strong> <span id="stats-coins-display">-</span></p>
+        <p><strong>Pontos de Atributo:</strong> <span id="stats-attribute-points-display">-</span></p>
+        <p><strong>Bônus XP:</strong> <span id="stats-xp-multiplier-display">-</span></p>
+
+        <h4 class="font-bold text-base mt-4 text-green-300 border-t border-gray-600 pt-2">Atributos Base:</h4>
+        <ul id="base-attributes-list" class="space-y-1 text-xs text-gray-400">
+            <li>Força (STR): -</li>
+            <li>Vigor (VIT): -</li>
+            <li>Controle de Ki (KI): -</li>
+        </ul>
+
+        <h4 class="font-bold text-base mt-4 text-green-300 border-t border-gray-600 pt-2">Técnicas Aprendidas:</h4>
+        <ul id="learned-techniques-list" class="space-y-1 text-xs text-gray-400">
+            <li class="italic text-gray-500">Nenhuma</li>
+        </ul>
+    </div>
+</div>

@@ -1,0 +1,76 @@
+Listagem de caminhos de pasta para o volume Arquivos
+O n£mero de s‚rie do volume ‚ 00000071 7EBE:6C20
+D:\DESKTOP\DRAGONBALL
+|   conteudo_completo.txt
+|   estrutura.bat
+|   estrutura_pasta.txt
+|   fundo dbz.cdr
+|   index.html
+|   
++---css
+|       style.css
+|       
++---imagens
+|   +---inimigos
+|   |       android17.png
+|   |       android18.png
+|   |       android19.png
+|   |       bills.png
+|   |       black.png
+|   |       bojack.png
+|   |       Brolly.png
+|   |       broly.png
+|   |       broly_bio.png
+|   |       buu_gordo.png
+|   |       cell.png
+|   |       cell1.png
+|   |       cell2.png
+|   |       cell3.png
+|   |       celljr.png
+|   |       cooler.png
+|   |       dabura.png
+|   |       dodoria.png
+|   |       freeza.png
+|   |       freeza1.png
+|   |       freeza_final.png
+|   |       garlic.png
+|   |       ginyu.png
+|   |       gogeta.png
+|   |       gohan_mistico.png
+|   |       goku_ssj3.png
+|   |       hirudegarn.png
+|   |       janemba.png
+|   |       kid_buu.jpg
+|   |       majin_vegeta.jpg
+|   |       metal_cooler.png
+|   |       nappa.png
+|   |       Nappa2.webp
+|   |       Raditz.png
+|   |       saibaman.png
+|   |       super_buu.png
+|   |       vegeta_saiyajin.png
+|   |       vegeta_ssj2.png
+|   |       vegetto.png
+|   |       zarbon.png
+|   |       
+|   \---player
+|           goku-player.png
+|           
++---js
+|       atributos.js
+|       characterCreation.js
+|       combate.js
+|       main.js
+|       meditation.js
+|       mestreKame.js
+|       treino.js
+|       
+\---views
+        arena.html
+        atributos.html
+        character-creation.html
+        combat-selection.html
+        meditation.html
+        mestreKame.html
+        status.html
+        

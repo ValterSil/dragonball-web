@@ -1,0 +1,17 @@
+<div id="attribute-manager-screen" class="view-content">
+    <button class="back-button" onclick="window.loadView('status')">← Voltar</button>
+    <h3 class="view-title">Gerenciador de Atributos</h3>
+    
+    <div class="w-full max-w-lg flex justify-between items-center bg-indigo-900 p-4 rounded-lg mb-6 shadow-md">
+        <span class="text-lg font-semibold text-white">Pontos Disponíveis:</span>
+        <span id="attr-remaining-points-display" class="text-3xl font-bold text-yellow-400 bg-indigo-700 px-3 py-1 rounded-full">0</span>
+    </div>
+
+    <div id="attribute-list" class="w-full max-w-lg space-y-4">
+        <!-- Lista de Atributos gerada por JS -->
+    </div>
+
+    <p id="attr-error-message" class="text-red-500 font-medium mt-4 text-sm hidden text-center">
+        Você não tem pontos de atributo para distribuir. Suba de Nível para ganhar mais!
+    </p>
+</div>

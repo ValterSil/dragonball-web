@@ -1,0 +1,75 @@
+<div id="combat-arena-view" class="view-content p-4 bg-gray-900 text-white">
+    <button class="back-button" onclick="window.endCombat('flee')">← Sair</button>
+    <h3 class="view-title text-yellow-400">Área des Treino</h3>
+   
+
+    <div class="combat-display w-full max-w-2xl bg-gray-800 p-6 rounded-lg shadow-xl flex flex-col items-center justify-center space-y-6">
+        
+       <!-- PLAYER vs ENEMY INFO -->
+<div class="flex justify-around items-center w-full">
+    <!-- ENEMY INFO -->
+    <div class="enemy-info flex flex-col items-center p-4 bg-gray-700 rounded-lg shadow-md w-2/5 relative">
+        <div class="winner-crown hidden">👑</div>
+        <img id="enemy-combat-img" src="https://via.placeholder.com/64" alt="Enemy" class="w-16 h-16 rounded-full border-2 border-red-500 mb-2">
+        <!-- texto DERROTADO colorido fora da div com filtro -->
+        <div id="enemy-battle-result" class="absolute bottom-1 left-1/2 transform -translate-x-1/2 text-red-600 font-bold text-lg hidden"></div>
+        <p class="text-lg font-bold text-red-400" id="enemy-combat-name">Goku (Whis)</p>
+        <p class="text-sm text-gray-300" id="enemy-combat-level">Nível 30</p>
+        <div class="w-full bg-gray-600 rounded-full h-3 mt-2">
+            <div id="enemy-combat-hp-bar" class="bg-red-500 h-3 rounded-full transition-all duration-300" style="width: 100%;"></div>
+        </div>
+        <p class="text-xs text-gray-300 mt-1">Vida <span id="enemy-combat-hp-val">748/748</span></p>
+
+        <!-- ENEMY KI BAR -->
+        <div class="w-full bg-gray-600 rounded-full h-3 mt-2">
+            <div id="enemy-combat-ki-bar" class="bg-blue-500 h-3 rounded-full transition-all duration-300" style="width: 100%;"></div>
+        </div>
+        <p class="text-xs text-gray-300 mt-1">KI <span id="enemy-combat-ki-val">100/100</span></p>
+    </div>
+
+    <span class="text-4xl font-extrabold text-yellow-400 mx-4">X</span>
+
+    <!-- PLAYER INFO -->
+    <div class="player-info flex flex-col items-center p-4 bg-gray-700 rounded-lg shadow-md w-2/5 relative">
+        <div class="winner-crown hidden">👑</div>
+        <img id="player-combat-img" src="imagens/player/goku-player.png" alt="Player" class="w-16 h-16 rounded-full border-2 border-blue-500 mb-2">
+        <!-- texto VENCEDOR colorido fora da div com filtro -->
+        <div id="player-battle-result" class="absolute bottom-1 left-1/2 transform -translate-x-1/2 text-red-600 font-bold text-lg hidden"></div>
+        <p class="text-lg font-bold text-blue-400" id="player-combat-name">Valter</p>
+        <p class="text-sm text-gray-300" id="player-combat-level">Nível 6</p>
+        <div class="w-full bg-gray-600 rounded-full h-3 mt-2">
+            <div id="player-combat-hp-bar" class="bg-green-500 h-3 rounded-full transition-all duration-300" style="width: 100%;"></div>
+        </div>
+        <p class="text-xs text-gray-300 mt-1">Vida <span id="player-combat-hp-val">100/100</span></p>
+        <div class="w-full bg-gray-600 rounded-full h-3 mt-1">
+            <div id="player-combat-ki-bar" class="bg-blue-500 h-3 rounded-full transition-all duration-300" style="width: 100%;"></div>
+        </div>
+        <p class="text-xs text-gray-300 mt-1">KI <span id="player-combat-ki-val">100/100</span></p>
+    </div>
+</div>
+
+
+        <!-- ATTACK CONTROLS -->
+        <div class="w-full max-w-xs mt-6 flex flex-col items-center space-y-3">
+            <select id="player-technique-select" class="w-full p-3 bg-gray-700 text-white rounded-lg border border-gray-600 focus:outline-none focus:border-blue-500">
+                <option value="">Selecione uma Técnica</option>
+                <!-- Opções de técnicas serão geradas por JS (combate.js) -->
+            </select>
+            <button id="combat-attack-button" class="action-btn w-full py-3 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-lg transition disabled:bg-gray-500 disabled:cursor-not-allowed">
+                Atacar
+            </button>
+        </div>
+
+        <!-- MOVIMENTOS ANTERIORES -->
+        <div class="text-sm text-gray-400 mt-4">Movimentos Anteriores:</div>
+        <div id="combat-log-moves" class="w-full max-w-md h-24 bg-gray-700 p-2 rounded-lg overflow-y-auto text-xs text-gray-300">
+            <!-- Log de movimentos de combate específico, se desejar implementar -->
+            <p>Nenhum movimento registrado ainda...</p>
+        </div>
+
+        <!-- BOTÃO PARA VOLTAR AO MENU DE SELEÇÃO DE PERSONAGEM -->
+        <button id="end-combat-return-button" class="hidden mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" onclick="window.loadView('character-creation')">
+            Voltar para Seleção de Personagem
+        </button>
+    </div>
+</div>

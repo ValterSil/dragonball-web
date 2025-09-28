@@ -1,0 +1,154 @@
+/* Estilos customizados para o RPG de navegador (Modelo de 3 Colunas) */
+body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    color: #e0e0e0;
+}
+
+#game-wrapper {
+    min-height: 95vh; /* Quase a altura total da tela */
+}
+
+/* Header */
+#game-header h1 {
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+}
+
+/* Estilos gerais das sidebars e menu de navegação */
+#left-sidebar, #right-sidebar {
+    /* Pode adicionar mais estilos específicos de background/textura se quiser imitar o print */
+}
+
+/* Estilo para links de menu nas sidebars */
+#left-nav-menu a, #right-nav-menu a {
+    display: flex;
+    align-items: center;
+    padding: 0.6rem 0.8rem;
+    color: #e0e0e0;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 0.9rem;
+    border-radius: 4px;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+#left-nav-menu a span, #right-nav-menu a span {
+    margin-right: 0.75rem;
+    line-height: 1; /* Alinha o emoji/ícone verticalmente */
+    font-size: 1.2rem; /* Tamanho do emoji/ícone */
+}
+
+#left-nav-menu a:hover, #right-nav-menu a:hover {
+    background-color: #3b82f6; /* Tailwind blue-500 */
+    color: white;
+}
+
+/* Log de Jogo */
+#game-log {
+    background-color: #000000;
+    padding: 1rem;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    white-space: pre-wrap; /* Preserva quebras de linha e espaços */
+    border-top: 2px solid #f59e0b; /* yellow-500 */
+}
+.log-message {
+    margin-bottom: 0.5rem;
+}
+
+/* Conteúdo Principal (Central) */
+#main-content-area {
+    /* O conteúdo será injetado aqui. Este é o container principal para as views. */
+    background-color: #222222; /* Fundo mais escuro para o conteúdo */
+}
+
+.view-content { /* Estilos que já tínhamos para as views dinâmicas */
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    align-items: center;
+    flex-grow: 1;
+    padding: 1.5rem;
+    overflow-y: auto; 
+}
+
+.view-title {
+    font-size: 1.75rem; 
+    font-weight: 700; 
+    color: #93c5fd; 
+    margin-bottom: 1.5rem; 
+    text-align: center;
+    border-bottom: 2px solid #60a5fa; 
+    padding-bottom: 0.5rem; 
+    width: 100%;
+    max-width: 600px; 
+}
+
+.back-button {
+    align-self: flex-start;
+    margin-bottom: 1rem;
+    background-color: #4b5563;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    transition: background-color 0.15s;
+}
+.back-button:hover {
+    background-color: #374151;
+}
+
+/* Estilos para cards de seleção (Raças, Inimigos) */
+.race-card, .enemy-card {
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 2px solid transparent;
+}
+.race-card:hover, .enemy-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+}
+.race-card.selected {
+    border-color: #3b82f6;
+    background-color: #2e3a46;
+}
+.enemy-card.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    filter: grayscale(100%);
+}
+
+/* Estilos de botões */
+.combat-tech-btn, .action-btn {
+    transition: background-color 0.15s;
+}
+
+/* Abas do Mestre Kame */
+.tab-btn {
+    transition: background-color 0.15s;
+}
+
+/* Classes utilitárias Tailwind redefinidas para garantir que não haja conflitos */
+.hidden { display: none !important; }
+
+/*Derroato */
+.card-derrotado {
+    filter: grayscale(1);
+    opacity: 0.7;
+}
+.winner-crown {
+    position: absolute;
+    top: -1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 2rem;
+    color: gold;
+    pointer-events: none;
+}
+.hidden {
+    display: none !important;
+}
+
+.enemy-info.card-derrotado #enemy-combat-name {
+    filter: none !important;
+    color: #dc2626 !important;
+}

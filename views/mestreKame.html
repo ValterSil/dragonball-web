@@ -1,0 +1,18 @@
+<div id="mestre-kame-menu" class="view-content">
+    <button class="back-button" onclick="window.loadView('status')">← Voltar</button>
+    <h3 class="view-title">Mestre Kame: Comércio e Treinamento</h3>
+
+    <!-- Navegação entre abas -->
+    <div class="flex space-x-2 mb-4 w-full max-w-lg justify-center">
+        <button id="tab-techniques" class="tab-btn bg-purple-700 hover:bg-purple-800 text-white py-2 px-3 rounded-t-lg">Técnicas</button>
+        <button id="tab-upgrades" class="tab-btn bg-gray-700 hover:bg-gray-600 text-white py-2 px-3 rounded-t-lg">Upgrades (Zeni)</button>
+    </div>
+
+    <!-- Conteúdo das abas -->
+    <div id="techniques-list" class="w-full max-w-lg space-y-4 flex-grow overflow-y-auto">
+        <!-- Lista de técnicas geradas por JS -->
+    </div>
+    <div id="upgrades-list" class="w-full max-w-lg space-y-4 flex-grow overflow-y-auto hidden">
+        <!-- Lista de upgrades gerados por JS -->
+    </div>
+</div>

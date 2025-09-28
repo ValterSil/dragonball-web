@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dragon Ball Z RPG On-Line</title>
+    <!-- Carrega Tailwind CSS para estilização e responsividade -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Link para o CSS customizado -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-gray-900 text-gray-100 font-sans min-h-screen flex flex-col items-center py-4">
+
+    <div id="game-wrapper" class="w-full max-w-7xl bg-gray-800 border-2 border-blue-600 rounded-lg shadow-2xl overflow-hidden flex flex-col">
+
+        <!-- HEADER SUPERIOR -->
+        <div id="game-header" class="relative bg-gradient-to-r from-blue-700 to-indigo-800 p-2 border-b-2 border-yellow-500 text-center">
+            <!-- Você pode adicionar seu logo aqui, por exemplo: -->
+            <!-- <img src="caminho/para/seu/logo.png" alt="Dragon Ball Z RPG On-Line" class="h-16 mx-auto mb-2 hidden md:block"> -->
+            <h1 class="text-3xl font-extrabold text-yellow-400">Dragon Ball Z RPG On-Line</h1>
+            <div class="text-sm text-gray-300 mt-1">Home : Diário : LOJA : HALL</div>
+        </div>
+
+        <!-- CONTEÚDO PRINCIPAL (3 COLUNAS) -->
+        <div class="flex flex-col md:flex-row flex-grow">
+
+            <!-- COLUNA ESQUERDA - INFORMAÇÕES DO JOGADOR -->
+            <div id="left-sidebar" class="w-full md:w-1/4 bg-gray-700 p-4 border-r border-yellow-500 overflow-y-auto flex-shrink-0">
+                <div class="p-2 bg-gray-800 rounded mb-4">
+                    <h2 id="left-player-name-title" class="text-lg font-bold text-blue-400 border-b border-blue-500 pb-1">Valter</h2>
+                    <div id="player-main-stats" class="text-sm mt-2 space-y-1">
+                        <p>Nome: <span id="left-player-name-val">-</span></p>
+                        <p>Raça: <span id="left-player-race-val">-</span></p>
+                        <p>Nível: <span id="left-player-level-val">-</span></p>
+                        <div class="w-full bg-gray-600 rounded-full h-2 mb-1">
+                            <div id="left-player-hp-bar" class="bg-green-500 h-2 rounded-full" style="width: 100%;"></div>
+                        </div>
+                        <p>HP: <span id="left-player-hp-val">-/-</span></p>
+                        <div class="w-full bg-gray-600 rounded-full h-2 mb-1">
+                            <div id="left-player-ki-bar" class="bg-blue-500 h-2 rounded-full" style="width: 100%;"></div>
+                        </div>
+                        <p>KI: <span id="left-player-ki-val">-/-</span></p>
+                        <p>Poder de Luta: <span id="left-player-power-val">-</span></p>
+                        <p>Zeni: <span id="left-player-zeni-val">-</span></p>
+                        <p class="text-red-400">Pontos de Atributo: <span id="left-player-attr-points-val">-</span></p>
+                    </div>
+                </div>
+
+                <!-- MENU DE NAVEGAÇÃO SECUNDÁRIO NA ESQUERDA -->
+                <div id="left-nav-menu" class="space-y-2 mt-4">
+                    <a href="#" onclick="window.loadView('status'); return false;" class="menu-link">
+                        <span class="text-2xl mr-2">👤</span> Status
+                    </a>
+                    <a href="#" onclick="window.loadView('meditation'); return false;" class="menu-link">
+                        <span class="text-2xl mr-2">🧘</span> Meditação
+                    </a>
+                    <a href="#" onclick="window.loadView('combat-selection'); return false;" class="menu-link">
+                        <span class="text-2xl mr-2">⚔️</span> Combate
+                    </a>
+                    <a href="#" onclick="window.loadView('atributos'); return false;" class="menu-link">
+                        <span class="text-2xl mr-2">📈</span> Atributos
+                    </a>
+                    <a href="#" onclick="window.loadView('mestreKame'); return false;" class="menu-link">
+                        <span class="text-2xl mr-2">👴</span> Mestre Kame
+                    </a>
+                    <!-- Adicione mais links conforme o print do jogo original -->
+                </div>
+            </div>
+
+            <!-- COLUNA CENTRAL - CONTEÚDO DINÂMICO PRINCIPAL -->
+            <div id="main-content-area" class="flex-grow bg-gray-800 p-4 overflow-y-auto">
+                <p class="text-center text-gray-400 mt-8">Carregando conteúdo principal...</p>
+                <!-- O conteúdo das views (Diário Oficial, Arena, etc.) será injetado aqui -->
+            </div>
+
+            <!-- COLUNA DIREITA - ATIVIDADES / SHOPS -->
+            <div id="right-sidebar" class="w-full md:w-1/4 bg-gray-700 p-4 border-l border-yellow-500 overflow-y-auto flex-shrink-0">
+                <h2 class="text-lg font-bold text-green-400 border-b border-green-500 pb-1 mb-4">Saia na frente com o PASS</h2>
+                <div id="right-nav-menu" class="space-y-2">
+                    <a href="#" class="menu-link"><span class="text-2xl mr-2">🎮</span> Meu RPG</a>
+                    <a href="#" class="menu-link"><span class="text-2xl mr-2">📚</span> Novatos</a>
+                    <a href="#" class="menu-link"><span class="text-2xl mr-2">⚔️</span> Desafios</a>
+                    <a href="#" class="menu-link"><span class="text-2xl mr-2">🏆</span> Torneio</a>
+                    <a href="#" class="menu-link"><span class="text-2xl mr-2">🐉</span> Sagas</a>
+                    <!-- Continue adicionando mais links de atividades aqui -->
+                </div>
+            </div>
+
+        </div>
+
+        <!-- LOG DE MENSAGENS (Abaixo das 3 Colunas) -->
+        <div id="game-log" class="h-32 overflow-y-auto bg-black text-green-400 p-3 text-sm border-t-2 border-yellow-500 flex-shrink-0">
+            <div class="log-message text-yellow-500 font-bold">Iniciando o RPG...</div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="js/main.js"></script>
+    <script type="module" src="js/characterCreation.js"></script>
+    <script type="module" src="js/meditation.js"></script> <!-- NOVO MÓDULO -->
+    <script type="module" src="js/treino.js"></script> <!-- Agora renomeado, mas mantém o arquivo -->
+    <script type="module" src="js/combate.js"></script>
+	<script type="module" src="js/combatSystem.js"></script>
+    <script type="module" src="js/atributos.js"></script>
+    <script type="module" src="js/mestreKame.js"></script>
+</body>
+</html>
