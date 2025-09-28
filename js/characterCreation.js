@@ -1,5 +1,10 @@
 // characterCreation.js
 import { playerStats, logMessage, updateUI, saveLocalState, RACE_DATA, updateCalculatedStats, loadView } from './main.js';
+import { getFirestore, doc, setDoc } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
+
+const db = getFirestore();
+const auth = getAuth();
 
 let selectedRace = null; // Variável para controlar a raça selecionada nesta tela
 
@@ -88,9 +93,9 @@ function selectRace(raceKey, cardElement) {
 }
 
 /**
- * Cria o personagem, salva no localStorage e exibe a área de ações.
+ * Cria o personagem, salva no Firestore e atualiza a UI.
  */
-function createCharacter(name, race) {
+async function createCharacter(name, race) {
     const raceInfo = RACE_DATA[race];
     playerStats.name = name;
     playerStats.race = race;
@@ -113,9 +118,21 @@ function createCharacter(name, race) {
     playerStats.health = playerStats.maxHealth;
     playerStats.ki = playerStats.maxKi;
 
+    // Salva dados no Firestore
+    try {
+      const user = auth.currentUser;
+      if (!user) throw new Error('Usuário não autenticado');
+      const userDoc = doc(db, 'players', user.uid);
+      await setDoc(userDoc, playerStats);
+      logMessage('Personagem salvo na conta do usuário!', 'text-green-400 font-bold');
+    } catch (error) {
+      console.error('Erro ao salvar personagem no Firestore:', error);
+      logMessage('Erro ao salvar personagem na conta.', 'text-red-500');
+    }
+
     saveLocalState();
     updateUI();
-    loadView('status'); // Volta para a tela de status/ação
+    await loadView('status'); // Volta para a tela de status/ação
 }
 
 // Expõe a função `selectRace` globalmente para ser usada nos onclick dos cards de raça
