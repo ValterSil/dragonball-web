@@ -38,25 +38,21 @@ showAuthForms();
 // Observa mudanças no estado de autenticação Firebase
 firebase.auth().onAuthStateChanged(async (user) => {
   if (user) {
-    // Usuário está logado
     hideAuthForms();
     authMessage.textContent = `Logado como: ${user.email}`;
     authMessage.className = 'text-green-400 text-center my-4';
 
-    // Carrega estado salvo e aguarda término
     await loadPlayerState();
 
-    // Decide se mostra criação de personagem ou tela de status
     if (!playerStats.race) {
       await loadView('character-creation');
     } else {
+      // Espera carregar a view antes de atualizar a UI
       await loadView('status');
-      updateUI(); // Atualiza a sidebar e tela de status
+      updateUI();
     }
   } else {
-    // Usuário não está logado, mostra os formulários e mensagem de login
     showAuthForms();
-
-    // Opcional: limpe ou recarregue a view principal do jogo aqui se desejar
   }
 });
+
