@@ -1,3 +1,5 @@
+// js/auth.js
+
 const auth = firebase.auth();
 const db = firebase.firestore();
 
@@ -84,7 +86,7 @@ auth.onAuthStateChanged(user => {
         if (userDoc.exists) {
           const data = userDoc.data();
           console.log("Dados do perfil:", data);
-          // Atualize frontend aqui
+          // Atualize seu frontend exibindo dados (nome, level, zeni etc)
         }
       });
   } else {
