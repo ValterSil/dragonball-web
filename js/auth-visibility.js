@@ -1,3 +1,4 @@
+// js/auth-visibility.js
 
 const registerForm = document.getElementById('register-form');
 const loginForm = document.getElementById('login-form');
@@ -19,6 +20,7 @@ function showGameContent() {
   mainContent.querySelector('p.text-center')?.classList.remove('hidden');
 }
 
+// Iniciar mostrando formulários
 showAuthForms();
 
 firebase.auth().onAuthStateChanged(user => {
