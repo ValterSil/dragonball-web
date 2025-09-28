@@ -36,10 +36,48 @@
     </div>
 
     <!-- MAIN CONTENT -->
-    <div class="flex flex-col md:flex-row flex-grow">
-      <div id="left-sidebar" class="w-full md:w-1/4 bg-gray-700 p-4 border-r border-yellow-500 overflow-y-auto flex-shrink-0">
-        <!-- Conteúdo do player aqui -->
-      </div>
+        <div class="flex flex-col md:flex-row flex-grow">
+            <!-- COLUNA ESQUERDA - INFORMAÇÕES DO JOGADOR -->
+            <div id="left-sidebar" class="w-full md:w-1/4 bg-gray-700 p-4 border-r border-yellow-500 overflow-y-auto flex-shrink-0">
+                <div class="p-2 bg-gray-800 rounded mb-4">
+                    <h2 id="left-player-name-title" class="text-lg font-bold text-blue-400 border-b border-blue-500 pb-1">Valter</h2>
+                    <div id="player-main-stats" class="text-sm mt-2 space-y-1">
+                        <p>Nome: <span id="left-player-name-val">-</span></p>
+                        <p>Raça: <span id="left-player-race-val">-</span></p>
+                        <p>Nível: <span id="left-player-level-val">-</span></p>
+                        <div class="w-full bg-gray-600 rounded-full h-2 mb-1">
+                            <div id="left-player-hp-bar" class="bg-green-500 h-2 rounded-full" style="width: 100%;"></div>
+                        </div>
+                        <p>HP: <span id="left-player-hp-val">-/-</span></p>
+                        <div class="w-full bg-gray-600 rounded-full h-2 mb-1">
+                            <div id="left-player-ki-bar" class="bg-blue-500 h-2 rounded-full" style="width: 100%;"></div>
+                        </div>
+                        <p>KI: <span id="left-player-ki-val">-/-</span></p>
+                        <p>Poder de Luta: <span id="left-player-power-val">-</span></p>
+                        <p>Zeni: <span id="left-player-zeni-val">-</span></p>
+                        <p class="text-red-400">Pontos de Atributo: <span id="left-player-attr-points-val">-</span></p>
+                    </div>
+                </div>
+
+                <!-- MENU DE NAVEGAÇÃO SECUNDÁRIO NA ESQUERDA -->
+                <div id="left-nav-menu" class="space-y-2 mt-4">
+                    <a href="#" onclick="window.loadView('status'); return false;" class="menu-link">
+                        <span class="text-2xl mr-2">👤</span> Status
+                    </a>
+                    <a href="#" onclick="window.loadView('meditation'); return false;" class="menu-link">
+                        <span class="text-2xl mr-2">🧘</span> Meditação
+                    </a>
+                    <a href="#" onclick="window.loadView('combat-selection'); return false;" class="menu-link">
+                        <span class="text-2xl mr-2">⚔️</span> Combate
+                    </a>
+                    <a href="#" onclick="window.loadView('atributos'); return false;" class="menu-link">
+                        <span class="text-2xl mr-2">📈</span> Atributos
+                    </a>
+                    <a href="#" onclick="window.loadView('mestreKame'); return false;" class="menu-link">
+                        <span class="text-2xl mr-2">👴</span> Mestre Kame
+                    </a>
+                </div>
+            </div>
 
       <div id="main-content-area" class="flex-grow bg-gray-800 p-4 overflow-y-auto">
         <p id="loading-message" class="text-center text-gray-400 mt-8">Carregando conteúdo principal...</p>
@@ -81,7 +119,13 @@
       </div>
 
       <div id="right-sidebar" class="w-full md:w-1/4 bg-gray-700 p-4 border-l border-yellow-500 overflow-y-auto flex-shrink-0">
-        <!-- Conteúdo da direita aqui -->
+                        <h2 class="text-lg font-bold text-green-400 border-b border-green-500 pb-1 mb-4">Saia na frente com o PASS</h2>
+                <div id="right-nav-menu" class="space-y-2">
+                    <a href="#" class="menu-link"><span class="text-2xl mr-2">🎮</span> Meu RPG</a>
+                    <a href="#" class="menu-link"><span class="text-2xl mr-2">📚</span> Novatos</a>
+                    <a href="#" class="menu-link"><span class="text-2xl mr-2">⚔️</span> Desafios</a>
+                    <a href="#" class="menu-link"><span class="text-2xl mr-2">🏆</span> Torneio</a>
+                    <a href="#" class="menu-link"><span class="text-2xl mr-2">🐉</span> Sagas</a>
       </div>
     </div>
 
