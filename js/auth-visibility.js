@@ -29,12 +29,18 @@ showAuthForms();
 // Usa Firebase onAuthStateChanged (supondo que auth está configurado globalmente)
 firebase.auth().onAuthStateChanged(user => {
   if (user) {
+    // Usuário está logado
+    // Mostra mensagem de bem-vindo mas não muda a view automaticamente
     authMessage.textContent = `Logado como: ${user.email}`;
     authMessage.className = 'text-green-400 text-center my-4';
-    showGameContent();
+
+    // Mostra conteúdo de jogo apenas se o usuário explicitamente acessar (não chama loadView aqui)
+    showAuthForms();  // mantém visibilidade do login/cadastro no começo
   } else {
+    // Usuário não está logado
     authMessage.textContent = 'Por favor faça login ou cadastre-se';
     authMessage.className = 'text-yellow-400 text-center my-4';
     showAuthForms();
   }
 });
+
