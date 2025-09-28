@@ -350,8 +350,22 @@ window.getTechById = getTechById;
 
 // Inicialização principal
 export async function initGame() {
-    loadPlayerState();
+  // Não chame imediatamente loadPlayerState()
+
+  firebase.auth().onAuthStateChanged(user => {
+    if (user) {
+      // Usuário logado, carrega estado salvo e inicia jogo
+      loadPlayerState();
+      loadView('status'); // ou outra tela inicial do jogo
+    } else {
+      // Usuário não logado, mostra login e cadastro
+      mainContentArea.innerHTML = ''; // limpa conteúdo principal
+      // Opcional: chame sua função para mostrar formulários login/cadastro
+      // Para evitar exibir criação de personagem antes do login
+    }
+  });
 }
+
 
 window.onload = initGame;
 window.loadView = loadView;
