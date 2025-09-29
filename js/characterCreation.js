@@ -1,4 +1,3 @@
-// characterCreation.js
 import { playerStats, logMessage, updateUI, saveLocalState, RACE_DATA, updateCalculatedStats, loadView } from './main.js';
 import { getFirestore, doc, setDoc } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
@@ -6,29 +5,21 @@ import { getAuth } from "firebase/auth";
 const db = getFirestore();
 const auth = getAuth();
 
-let selectedRace = null; // Variável para controlar a raça selecionada nesta tela
+let selectedRace = null;
 
-/**
- * Inicializa a tela de criação de personagem.
- */
 export function initCharacterCreationScreen() {
-    selectedRace = null; // Reseta a seleção de raça
-    generateRaceCards(); // Gera os cards de raça
+    selectedRace = null;
+    generateRaceCards();
 
     const characterNameInput = document.getElementById('character-name-input');
     const createButton = document.getElementById('create-character-button');
     const errorMessage = document.getElementById('creation-error-message');
 
-    // Estado inicial do botão
-    if (createButton) {
-        createButton.disabled = true; // Começa desabilitado
-    }
-    if (errorMessage) {
-        errorMessage.classList.add('hidden'); // Esconde erros
-    }
+    if (createButton) createButton.disabled = true;
+    if (errorMessage) errorMessage.classList.add('hidden');
 
     if (characterNameInput) {
-        characterNameInput.value = ''; // Limpa o campo de nome
+        characterNameInput.value = '';
         characterNameInput.oninput = () => {
             if (createButton) {
                 createButton.disabled = !selectedRace || characterNameInput.value.trim().length === 0;
@@ -37,10 +28,10 @@ export function initCharacterCreationScreen() {
     }
 
     if (createButton) {
-        createButton.onclick = () => {
+        createButton.onclick = async () => {
             const name = characterNameInput.value.trim();
-            if (selectedRace && name) { 
-                createCharacter(name, selectedRace); 
+            if (selectedRace && name) {
+                await createCharacter(name, selectedRace);
             } else {
                 if (errorMessage) {
                     errorMessage.textContent = 'Por favor, digite um nome e escolha uma raça.';
@@ -51,9 +42,6 @@ export function initCharacterCreationScreen() {
     }
 }
 
-/**
- * Gera os cards de raça na tela de criação de personagem.
- */
 function generateRaceCards() { 
     const raceSelectionDiv = document.getElementById('race-selection');
     if (!raceSelectionDiv) return; 
@@ -74,9 +62,6 @@ function generateRaceCards() {
     });
 }
 
-/**
- * Seleciona uma raça e atualiza a UI.
- */
 function selectRace(raceKey, cardElement) {
     document.querySelectorAll('.race-card').forEach(card => card.classList.remove('selected'));
     cardElement.classList.add('selected');
@@ -88,18 +73,15 @@ function selectRace(raceKey, cardElement) {
     }
     const errorMessage = document.getElementById('creation-error-message');
     if (errorMessage) {
-        errorMessage.classList.add('hidden'); // Esconde erro ao selecionar raça
+        errorMessage.classList.add('hidden');
     }
 }
 
-/**
- * Cria o personagem, salva no Firestore e atualiza a UI.
- */
 async function createCharacter(name, race) {
     const raceInfo = RACE_DATA[race];
     playerStats.name = name;
     playerStats.race = race;
-    playerStats.attributes = { strength: 10, vitality: 10, ki_control: 10 }; // Atributos base
+    playerStats.attributes = { strength: 10, vitality: 10, ki_control: 10 };
     playerStats.attributePoints = 0; 
     playerStats.level = 1;
     playerStats.xp = 0;
@@ -109,31 +91,28 @@ async function createCharacter(name, race) {
     updateCalculatedStats(); 
     
     const initialTech = raceInfo.techniques.find(t => t.minLevel === 1);
-    if (initialTech) playerStats.learnedTechniques = [initialTech.id];
-    else playerStats.learnedTechniques = []; // Garante que é um array, mesmo sem técnicas iniciais
-
+    playerStats.learnedTechniques = initialTech ? [initialTech.id] : [];
+    
     logMessage(`Personagem ${name} da Raça ${race} criado! Poder Inicial: ${playerStats.power}. Defesa: ${playerStats.defense}`, 'text-green-400 font-bold');
     
-    // Define health e ki para o máximo após a criação
     playerStats.health = playerStats.maxHealth;
     playerStats.ki = playerStats.maxKi;
 
     // Salva dados no Firestore
     try {
-      const user = auth.currentUser;
-      if (!user) throw new Error('Usuário não autenticado');
-      const userDoc = doc(db, 'players', user.uid);
-      await setDoc(userDoc, playerStats);
-      logMessage('Personagem salvo na conta do usuário!', 'text-green-400 font-bold');
+        const user = auth.currentUser;
+        if (!user) throw new Error('Usuário não autenticado');
+        const userDoc = doc(db, 'players', user.uid);
+        await setDoc(userDoc, playerStats);
+        logMessage('Personagem salvo na conta do usuário!', 'text-green-400 font-bold');
     } catch (error) {
-      console.error('Erro ao salvar personagem no Firestore:', error);
-      logMessage('Erro ao salvar personagem na conta.', 'text-red-500');
+        console.error('Erro ao salvar personagem no Firestore:', error);
+        logMessage('Erro ao salvar personagem na conta.', 'text-red-500');
     }
 
     saveLocalState();
     updateUI();
-    await loadView('status'); // Volta para a tela de status/ação
+    await loadView('status'); 
 }
 
-// Expõe a função `selectRace` globalmente para ser usada nos onclick dos cards de raça
 window.selectRace = selectRace;
