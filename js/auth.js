@@ -3,16 +3,21 @@
 (() => {
   const auth = window.firebaseAuth;
   const db = window.firebaseDb;
+  const { doc, setDoc, getDoc } = window.firebaseFirestoreFunctions;
 
   const registerForm = document.getElementById('register-form');
   const loginForm = document.getElementById('login-form');
   const messageEl = document.getElementById('auth-message');
   const logoutBtn = document.getElementById('logout-button');
 
-
+  if (!auth || !db || !doc || !setDoc || !getDoc) {
+    console.error("Firebase não inicializado corretamente antes de executar auth.js");
+    return;
+  }
 
   function saveUserProfile(uid, email) {
-    return setDoc(doc(db, "users", uid), {
+    const userDoc = doc(db, "users", uid);
+    return setDoc(userDoc, {
       email: email,
       createdAt: new Date(),
       characterName: "Nome padrão",
@@ -79,7 +84,7 @@
     });
   }
 
-  auth.onAuthStateChanged(async user => {
+  auth.onAuthStateChanged(async (user) => {
     if (user) {
       console.log("Usuário logado:", user.email);
       messageEl.textContent = `Logado como: ${user.email}`;
@@ -95,4 +100,5 @@
       messageEl.textContent = 'Por favor faça login.';
     }
   });
+
 })();
