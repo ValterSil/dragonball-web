@@ -9,7 +9,7 @@
   const messageEl = document.getElementById('auth-message');
   const logoutBtn = document.getElementById('logout-button');
 
-  import { doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js';
+
 
   function saveUserProfile(uid, email) {
     return setDoc(doc(db, "users", uid), {
