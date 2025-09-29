@@ -1,5 +1,5 @@
 import { loadView, playerStats, updateUI } from './main.js';
-import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js';
+
 
 const auth = window.firebaseAuth;
 const db = window.firebaseDb;
