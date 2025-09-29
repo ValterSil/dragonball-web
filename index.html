@@ -20,6 +20,8 @@
   window.firebaseDb = getFirestore(app);
 
   window.firebaseFirestoreFunctions = { doc, setDoc, getDoc };
+
+    import("./js/auth.js");
 </script>
 <head>
   <meta charset="UTF-8" />
@@ -145,7 +147,7 @@
 
 
 
-  <script src="js/auth.js"></script>
+ 
   <script type="module" src="js/auth-visibility.js"></script>
   <script type="module" src="js/main.js"></script>
   <script type="module" src="js/characterCreation.js"></script>
