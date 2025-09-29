@@ -1,8 +1,8 @@
 // js/auth.js
 
 (() => {
-  const auth = firebase.auth();
-  const db = firebase.firestore();
+  const auth = window.firebaseAuth;
+  const db = window.firebaseDb;
 
   const registerForm = document.getElementById('register-form');
   const loginForm = document.getElementById('login-form');
