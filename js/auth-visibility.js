@@ -4,13 +4,23 @@ import { loadView, playerStats, updateUI } from './main.js';
 const auth = window.firebaseAuth;
 const db = window.firebaseDb;
 
-function hideAuthForms() {
-  // Implemente a função que esconde seus formulários
-}
-function showAuthForms() {
-  // Implemente a função que mostra seus formulários
-}
+const registerForm = document.getElementById('register-form');
+const loginForm = document.getElementById('login-form');
+const logoutBtn = document.getElementById('logout-button');
 const authMessage = document.getElementById('auth-message');
+
+function showAuthForms() {
+  if (registerForm) registerForm.style.display = 'block';
+  if (loginForm) loginForm.style.display = 'block';
+  if (logoutBtn) logoutBtn.style.display = 'none';
+  authMessage.textContent = '';
+}
+
+function hideAuthForms() {
+  if (registerForm) registerForm.style.display = 'none';
+  if (loginForm) loginForm.style.display = 'none';
+  if (logoutBtn) logoutBtn.style.display = 'block';
+}
 
 auth.onAuthStateChanged(async (user) => {
   if (user) {
@@ -28,6 +38,7 @@ auth.onAuthStateChanged(async (user) => {
     }
   } else {
     showAuthForms();
+    await loadView(''); // ou uma view específica de login se houver
   }
 });
 
@@ -40,6 +51,5 @@ async function loadPlayerData() {
   if (docSnap.exists()) {
     return docSnap.data();
   }
-
   return null;
 }
