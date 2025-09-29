@@ -9,8 +9,10 @@
   const messageEl = document.getElementById('auth-message');
   const logoutBtn = document.getElementById('logout-button');
 
+  import { doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js';
+
   function saveUserProfile(uid, email) {
-    return db.collection("users").doc(uid).set({
+    return setDoc(doc(db, "users", uid), {
       email: email,
       createdAt: new Date(),
       characterName: "Nome padrão",
@@ -77,23 +79,20 @@
     });
   }
 
-  auth.onAuthStateChanged(user => {
+  auth.onAuthStateChanged(async user => {
     if (user) {
       console.log("Usuário logado:", user.email);
       messageEl.textContent = `Logado como: ${user.email}`;
 
-      db.collection("users").doc(user.uid).get()
-        .then(userDoc => {
-          if (userDoc.exists) {
-            const data = userDoc.data();
-            console.log("Dados do perfil:", data);
-            // Atualize seu frontend exibindo dados (nome, level, zeni etc)
-          }
-        });
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      if (userDoc.exists()) {
+        const data = userDoc.data();
+        console.log("Dados do perfil:", data);
+        // Atualize seu frontend exibindo os dados do usuário (nome, level, zeni etc)
+      }
     } else {
       console.log("Nenhum usuário logado.");
       messageEl.textContent = 'Por favor faça login.';
     }
   });
-
 })();
