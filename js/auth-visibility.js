@@ -38,7 +38,7 @@ auth.onAuthStateChanged(async (user) => {
     }
   } else {
     showAuthForms();
-    await loadView('login'); // ou uma view específica de login se houver
+    await loadView('status'); // ou uma view específica de login se houver
   }
 });
 
