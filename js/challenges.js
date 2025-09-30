@@ -1,4 +1,5 @@
 import { auth } from './auth.js'; 
+import { db } from './auth.js';
 import { doc, collection, getDocs, query, where, updateDoc, setDoc, arrayUnion, onSnapshot } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 import { loadView } from './main.js';
 import { playerStats } from './main.js';
