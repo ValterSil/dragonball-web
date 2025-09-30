@@ -144,7 +144,7 @@ export function logMessage(message, className = 'text-gray-300') {
   }
 }
 
-export async function loadView(viewName) {
+export async function loadView(viewName, viewParams = {}) {
   if (combatState.isActive && viewName !== 'arena') {
     logMessage(
       'Você não pode sair do combate enquanto ele estiver ativo!',
@@ -169,34 +169,42 @@ export async function loadView(viewName) {
       case 'status':
         updateUI();
         break;
-            case 'meditation': // NOVA VIEW
-                const meditationModule = await import('./meditation.js');
-                meditationModule.initMeditationScreen();
-                break;
-            case 'combat-selection': // RENOMEADA VIEW (antiga treino)
-                const treinoModule = await import('./treino.js'); // Usando o nome antigo do arquivo JS
-                treinoModule.showCombatSelectionScreen();
-                break;
-            case 'arena':
-                const combateModule = await import('./combate.js');
-                console.log(`[main.js] loadView('arena'): Chamando combateModule.updateCombatUI().`); // DEBUG
-                combateModule.updateCombatUI(); // Garante que a UI de combate seja atualizada ao voltar para ela
-                break;
-            case 'mestreKame':
-                const mestreKameModule = await import('./mestreKame.js');
-                mestreKameModule.showMestreKameMenu('techniques'); // Padrão para aba de técnicas
-                break;
-            case 'atributos':
-                const atributosModule = await import('./atributos.js');
-                atributosModule.showAttributeManagerScreen();
-                break;
-        }
+      case 'meditation':
+        const meditationModule = await import('./meditation.js');
+        meditationModule.initMeditationScreen();
+        break;
+      case 'combat-selection':
+        const treinoModule = await import('./treino.js');
+        treinoModule.showCombatSelectionScreen();
+        break;
+      case 'arena':
+        const combateModule = await import('./combate.js');
+        combateModule.updateCombatUI(viewParams); // se quiser, pode usar parâmetros aqui também
+        break;
+      case 'mestreKame':
+        const mestreKameModule = await import('./mestreKame.js');
+        mestreKameModule.showMestreKameMenu('techniques');
+        break;
+      case 'atributos':
+        const atributosModule = await import('./atributos.js');
+        atributosModule.showAttributeManagerScreen();
+        break;
+      case 'challenges':
+        const challengesModule = await import('./challenges.js');
+        challengesModule.loadChallengesScreen(viewParams); // passar params caso precise
+        break;
+      case 'pvp-combat':
+        const pvpModule = await import('./pvpCombat.js');
+        pvpModule.loadPvpCombatScreen(viewParams); // agora funciona
+        break;
+    }
   } catch (error) {
     console.error(error);
     logMessage(`❌ Erro ao carregar a tela '${viewName}'`, 'text-red-500');
     mainContentArea.innerHTML = `<p class="text-red-500 text-center mt-8">Erro ao carregar a tela. Verifique o console para detalhes.</p>`;
   }
 }
+
 
 export function loadPlayerState() {
   const localData = localStorage.getItem('rpgPlayerStats');
