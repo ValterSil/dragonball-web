@@ -197,8 +197,13 @@ export async function loadView(viewName, viewParams = {}) {
         challengesModule.loadChallengesScreen(viewParams); // passar params caso precise
         break;
       case 'pvp-combat':
-        const pvpModule = await import('./pvpCombat.js');
-        pvpModule.loadPvpCombatScreen(viewParams); // agora funciona
+          try {
+          const pvpModule = await import('./pvpCombat.js');
+          await pvpModule.loadPvpCombatScreen(viewParams);
+        } catch (err) {
+          console.error('Erro ao carregar pvpCombat.js:', err);
+          logMessage('❌ Erro ao carregar a tela PvP Combat', 'text-red-500');
+        }
         break;
     }
   } catch (error) {
