@@ -1,6 +1,7 @@
 // treino.js (Renomeado logicamente para combatSelection, mas o nome do arquivo permanece treino.js)
 import { playerStats, logMessage, updateUI, saveLocalState, disableActions, updateCalculatedStats, POINTS_PER_LEVEL, XP_TO_LEVEL, ENEMY_DATA, loadView } from './main.js';
 
+
 /**
  * Exibe a tela de seleção de inimigos para treino de combate.
  * Esta função é chamada quando a view 'combat-selection' é carregada.
