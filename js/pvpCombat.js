@@ -40,6 +40,8 @@ export async function loadPvpCombatScreen(params) {
       loadView('combat-selection');
       return;
     }
+
+    renderTechniques(playerStats.techniques || []);
   });
 }
 
@@ -150,19 +152,14 @@ export async function activateMatch(matchIdToActivate) {
         const uid = auth.currentUser.uid;
         if (uid === data.player1.uid || uid === data.player2.uid) {
           window.passedParams = { matchId: matchIdToActivate };
-          
-          // Carrega a view pvp-combat
           loadView('pvp-combat');
-
-          // Aguarda um pouco para garantir DOM e recursos carregados
           setTimeout(() => {
             const screen = document.getElementById('pvp-combat-screen');
             if (screen) {
               screen.classList.remove('hidden');
-              // Chama função loadPvpCombatScreen com os parâmetros passados
               loadPvpCombatScreen(window.passedParams);
             }
-          }, 300); // 300ms pode ser ajustado conforme necessário
+          }, 300);
         }
       }
     }
@@ -170,4 +167,3 @@ export async function activateMatch(matchIdToActivate) {
     console.error('[PvP] Erro ao ativar partida:', err);
   }
 }
-
