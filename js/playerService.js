@@ -22,7 +22,7 @@ export async function savePlayerToFirestore() {
             race: playerStats.race,
             level: playerStats.level,
             xp: playerStats.xp,
-            coins: playerStats.coins,
+            zeni: playerStats.coins,
             attributes: playerStats.attributes,
             attributePoints: playerStats.attributePoints,
             upgrades: playerStats.upgrades,
