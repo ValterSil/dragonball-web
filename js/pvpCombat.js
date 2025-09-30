@@ -1,23 +1,29 @@
 import { auth, db } from './auth.js';
-import { doc, getDoc, onSnapshot, updateDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+import {
+  doc, getDoc, onSnapshot, updateDoc,
+  collection, query, where
+} from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 import { playerStats, logMessage, loadView, getTechById } from './main.js';
 
 let currentMatch = null;
 let currentPlayerId = null;
 let opponentId = null;
 
+// Função para iniciar o listener global que detecta partidas PvP ativas que envolvam o jogador logado
 export function listenForActiveMatches() {
-  // Ouve todas as partidas que envolvam o jogador logado e que estejam ativas
   auth.onAuthStateChanged(user => {
     if (!user) return;
+
     const userId = user.uid;
     const matchesRef = collection(db, 'pvpMatches');
-    const q = query(matchesRef, where('status', '==', 'active')); // Você pode otimizar para partidas que envolvam o player
+
+    // Ouve partidas ativas
+    const q = query(matchesRef, where('status', '==', 'active'));
+
     onSnapshot(q, snapshot => {
       snapshot.forEach(docSnap => {
         const data = docSnap.data();
         if (data.player1.uid === userId || data.player2.uid === userId) {
-          // Se corresponde a este jogador
           loadView('pvp-combat', { matchId: docSnap.id });
         }
       });
@@ -25,6 +31,7 @@ export function listenForActiveMatches() {
   });
 }
 
+// Carrega a tela PvP com os dados e sincroniza a UI
 export async function loadPvpCombatScreen(params) {
   if (!params?.matchId) {
     logMessage("Match ID não informado.", "text-red-500");
@@ -39,12 +46,13 @@ export async function loadPvpCombatScreen(params) {
   }
 
   const matchRef = doc(db, "pvpMatches", params.matchId);
-  onSnapshot(matchRef, async (snapshot) => {
+  onSnapshot(matchRef, async snapshot => {
     if (!snapshot.exists()) {
       logMessage("Partida não encontrada.", "text-red-500");
       loadView('combat-selection');
       return;
     }
+
     currentMatch = snapshot.data();
 
     if (currentMatch.player1.uid === currentPlayerId) {
@@ -61,6 +69,7 @@ export async function loadPvpCombatScreen(params) {
   });
 }
 
+// Carrega dados do jogador e oponente e atualiza a UI do combate
 async function loadPlayersData(playerUid, opponentUid) {
   const playerDoc = await getDoc(doc(db, "users", playerUid));
   const opponentDoc = await getDoc(doc(db, "users", opponentUid));
@@ -77,10 +86,10 @@ async function loadPlayersData(playerUid, opponentUid) {
   Object.assign(playerStats, playerData);
 
   updateCombatUI(playerData, opponentData);
-  
   renderTechniques(playerData.learnedTechniques || []);
 }
 
+// Renderiza dinamicamente os botões das técnicas do player
 function renderTechniques(techniques) {
   const container = document.getElementById('techniques-list');
   if (!container) {
@@ -99,21 +108,22 @@ function renderTechniques(techniques) {
   });
 }
 
+// Atualiza os dados exibidos (nome, nível, barras etc.) na UI do combate
 export function updateCombatUI(playerData, opponentData) {
-  const safeSetText = (id, text) => { const el = document.getElementById(id); if(el) el.textContent = text; };
-  const safeSetWidth = (id, width) => { const el = document.getElementById(id); if(el) el.style.width = width; };
-  const safeSetSrc = (id, src) => { const el = document.getElementById(id); if(el) el.src = src; };
+  const safeSetText = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
+  const safeSetWidth = (id, width) => { const el = document.getElementById(id); if (el) el.style.width = width; };
+  const safeSetSrc = (id, src) => { const el = document.getElementById(id); if (el) el.src = src; };
 
   safeSetText('player-combat-name', playerData.characterName || "Você");
   safeSetText('player-combat-level', `Nível ${playerData.level || 1}`);
 
-  let playerMaxHealth = playerData.maxHealth || 100;
-  let playerHealth = playerData.health || 0;
+  const playerMaxHealth = playerData.maxHealth || 100;
+  const playerHealth = playerData.health || 0;
   safeSetText('player-combat-hp-val', `${playerHealth}/${playerMaxHealth}`);
   safeSetWidth('player-combat-hp-bar', `${(playerHealth / playerMaxHealth) * 100}%`);
 
-  let playerMaxKi = playerData.maxKi || 100;
-  let playerKi = playerData.ki || 0;
+  const playerMaxKi = playerData.maxKi || 100;
+  const playerKi = playerData.ki || 0;
   safeSetText('player-combat-ki-val', `${playerKi}/${playerMaxKi}`);
   safeSetWidth('player-combat-ki-bar', `${(playerKi / playerMaxKi) * 100}%`);
 
@@ -122,19 +132,20 @@ export function updateCombatUI(playerData, opponentData) {
   safeSetText('enemy-combat-name', opponentData.characterName || "Oponente");
   safeSetText('enemy-combat-level', `Nível ${opponentData.level || 1}`);
 
-  let opponentMaxHealth = opponentData.maxHealth || 100;
-  let opponentHealth = opponentData.health || 0;
+  const opponentMaxHealth = opponentData.maxHealth || 100;
+  const opponentHealth = opponentData.health || 0;
   safeSetText('enemy-combat-hp-val', `${opponentHealth}/${opponentMaxHealth}`);
   safeSetWidth('enemy-combat-hp-bar', `${(opponentHealth / opponentMaxHealth) * 100}%`);
 
-  let opponentMaxKi = opponentData.maxKi || 100;
-  let opponentKi = opponentData.ki || 0;
+  const opponentMaxKi = opponentData.maxKi || 100;
+  const opponentKi = opponentData.ki || 0;
   safeSetText('enemy-combat-ki-val', `${opponentKi}/${opponentMaxKi}`);
   safeSetWidth('enemy-combat-ki-bar', `${(opponentKi / opponentMaxKi) * 100}%`);
 
   safeSetSrc('enemy-combat-img', opponentData.avatarUrl || 'imagens/player/placeholder.png');
 }
 
+// Lógica do ataque do player na partida PvP
 export async function playerAttack(technique) {
   if (!currentMatch) {
     logMessage("Partida não carregada.", "text-red-500");
@@ -166,30 +177,12 @@ export async function playerAttack(technique) {
   }
 }
 
+// Função que ativa a partida PvP atualizando o status no banco Firebase
 export async function activateMatch(matchIdToActivate) {
   const matchRef = doc(db, "pvpMatches", matchIdToActivate);
   try {
     await updateDoc(matchRef, { status: "active", updatedAt: new Date() });
     logMessage('[PvP] Partida ativada!');
-
-    const matchDataSnapshot = await getDoc(matchRef);
-    if (matchDataSnapshot.exists()) {
-      const data = matchDataSnapshot.data();
-      if (auth.currentUser) {
-        const uid = auth.currentUser.uid;
-        if (uid === data.player1.uid || uid === data.player2.uid) {
-          window.passedParams = { matchId: matchIdToActivate };
-          loadView('pvp-combat');
-          setTimeout(() => {
-            const screen = document.getElementById('pvp-combat-screen');
-            if (screen) {
-              screen.classList.remove('hidden');
-              loadPvpCombatScreen(window.passedParams);
-            }
-          }, 300);
-        }
-      }
-    }
   } catch (err) {
     console.error('[PvP] Erro ao ativar partida:', err);
   }
