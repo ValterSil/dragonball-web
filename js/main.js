@@ -1,9 +1,6 @@
-// main.js - Core do Jogo
+import { listenForActiveMatches } from './js/pvpCombat.js';
 
 // --- Configurações e Estado do Jogo ---
-
-
-import { listenForActiveMatches } from './js/pvpCombat.js';
 
 export let playerStats = {
   name: null,
@@ -33,6 +30,7 @@ export let playerStats = {
   baseMaxHealth: 100,
   baseMaxKi: 100,
 };
+
 export const XP_TO_LEVEL = 100;
 export const POINTS_PER_LEVEL = 5;
 
@@ -183,7 +181,7 @@ export async function loadView(viewName, viewParams = {}) {
         break;
       case 'arena':
         const combateModule = await import('./combate.js');
-        combateModule.updateCombatUI(viewParams); // se quiser, pode usar parâmetros aqui também
+        combateModule.updateCombatUI(viewParams);
         break;
       case 'mestreKame':
         const mestreKameModule = await import('./mestreKame.js');
@@ -195,10 +193,10 @@ export async function loadView(viewName, viewParams = {}) {
         break;
       case 'challenges':
         const challengesModule = await import('./challenges.js');
-        challengesModule.loadChallengesScreen(viewParams); // passar params caso precise
+        challengesModule.loadChallengesScreen(viewParams);
         break;
       case 'pvp-combat':
-          try {
+        try {
           const pvpModule = await import('./pvpCombat.js');
           await pvpModule.loadPvpCombatScreen(viewParams);
         } catch (err) {
@@ -213,7 +211,6 @@ export async function loadView(viewName, viewParams = {}) {
     mainContentArea.innerHTML = `<p class="text-red-500 text-center mt-8">Erro ao carregar a tela. Verifique o console para detalhes.</p>`;
   }
 }
-
 
 export function loadPlayerState() {
   const localData = localStorage.getItem('rpgPlayerStats');
