@@ -10,20 +10,35 @@ let matchRef = null;
 let currentPlayerId = null;
 let opponentId = null;
 let matchData = null;
-// val
+
+// aaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+export function updateCombatUI(opponentStats) {
+    if (!opponentStats) return;
+
+    const logElement = document.getElementById('combat-log');
+    if (logElement) {
+        const div = document.createElement('div');
+        div.className = 'log-message text-gray-300';
+        div.textContent = `[updateCombatUI] Status do inimigo atualizado: HP=${opponentStats.health}, Ki=${opponentStats.ki}`;
+        logElement.prepend(div);
+    }
+}
+
+// Função para carregar a tela PvP
 export function loadPvpCombatScreen(params) {
+    console.log('[loadPvpCombatScreen] params:', params);
+
     matchId = params.matchId;
     currentPlayerId = auth.currentUser.uid;
     matchRef = doc(db, "pvpMatches", matchId);
 
-    console.log('[LOG PvP] Listener do match iniciado para matchId:', matchId);
-
     onSnapshot(matchRef, snapshot => {
         matchData = snapshot.data();
+        console.log('[onSnapshot] matchData:', matchData);
+
         if (!matchData) return;
 
-        console.log('[LOG PvP] Snapshot recebido:', matchData);
-
+        // Identifica o adversário
         opponentId = matchData.player1.uid === currentPlayerId ? matchData.player2.uid : matchData.player1.uid;
 
         const localPlayerStats = matchData.player1.uid === currentPlayerId ? matchData.player1.stats : matchData.player2.stats;
@@ -36,32 +51,33 @@ export function loadPvpCombatScreen(params) {
         playerStats.defense = localPlayerStats.defense;
         playerStats.upgrades = { ...localPlayerStats.upgrades };
 
-        // Atualiza UI
-        updateCombatUI(opponentStats);
+        // Atualiza UI se já estiver na tela PvP
+        if (document.getElementById('combat-log')) {
+            updateCombatUI(opponentStats);
+        }
 
-        // Logs detalhados
+        // Checa o status do match
         if (matchData.status === "accepted") {
-            window.logMessage('Oponente aceitou o convite! Combate iniciado.');
-        } else if (matchData.status === "finished") {
-            window.logMessage('Partida finalizada!');
-            alert('Partida finalizada!');
-        } else {
-            window.logMessage('Aguardando o outro jogador...');
+            console.log('[onSnapshot] Partida aceita! Redirecionando para pvp-combat.html...');
+            window.passedParams = { matchId }; // mantém o matchId
+            window.location.href = 'pvp-combat.html';
+        }
+
+        if (matchData.status === "finished") {
+            alert("Partida finalizada!");
         }
     });
 }
 
+// Função de ataque
 export async function playerAttack(selectedTechnique) {
-    if (!matchData || matchData.turn !== currentPlayerId) {
-        window.logMessage('Não é sua vez!');
-        return;
-    }
+    if (!matchData || matchData.turn !== currentPlayerId) return;
 
     const opponentStats = matchData.player1.uid === currentPlayerId ? matchData.player2.stats : matchData.player1.stats;
+
     const damage = (selectedTechnique.power || 10) - (opponentStats.defense || 0);
     opponentStats.health -= Math.max(damage, 0);
 
-    window.logMessage(`Você causou ${Math.max(damage, 0)} de dano com ${selectedTechnique.name}!`);
     updateCombatUI(opponentStats);
 
     const newTurn = opponentId;
@@ -71,4 +87,12 @@ export async function playerAttack(selectedTechnique) {
         : { "player1.stats": opponentStats, turn: newTurn, updatedAt: new Date() };
 
     await updateDoc(matchRef, update);
+
+    const logElement = document.getElementById('game-log');
+    if (logElement) {
+        const div = document.createElement('div');
+        div.className = 'log-message text-gray-300';
+        div.textContent = `Você usou ${selectedTechnique.name} e causou ${Math.max(damage, 0)} de dano!`;
+        logElement.prepend(div);
+    }
 }
