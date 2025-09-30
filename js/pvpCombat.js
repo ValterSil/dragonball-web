@@ -1,7 +1,7 @@
 // pvpCombat.js
 import { auth, db } from './auth.js';
 import { doc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
-import { playerStats, updateCombatUI } from './main.js';
+import { playerStats } from './main.js'; // só importa playerStats
 
 let matchId = null;
 let matchRef = null;
@@ -31,7 +31,8 @@ export function loadPvpCombatScreen(params) {
         playerStats.defense = localPlayerStats.defense;
         playerStats.upgrades = { ...localPlayerStats.upgrades }; // copia upgrades
 
-        updateCombatUI(opponentStats);
+        // usa a função global do main.js
+        if (window.updateCombatUI) window.updateCombatUI(opponentStats);
 
         if (matchData.status === "finished") {
             alert("Partida finalizada!");
