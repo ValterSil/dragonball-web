@@ -1,189 +1,46 @@
-import { auth, db } from './auth.js';
-import {
-  doc, getDoc, onSnapshot, updateDoc,
-  collection, query, where
-} from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
-import { playerStats, logMessage, loadView, getTechById } from './main.js';
+<div id="pvp-combat-screen" class="view-content hidden">
+  <button class="back-button" onclick="window.loadView('combat-selection')">← Voltar</button>
+  <h3 class="view-title">Combate PvP</h3>
 
-let currentMatch = null;
-let currentPlayerId = null;
-let opponentId = null;
+  <div class="flex justify-around mb-4">
+    <div class="player-info flex flex-col items-center bg-gray-700 rounded-lg p-4 w-2/5 relative">
+      <img id="player-combat-img" src="imagens/player/goku-player.png" alt="Jogador" class="w-16 h-16 rounded-full border-2 border-blue-500 mb-2" />
+      <p class="text-lg font-bold text-blue-400" id="player-combat-name">-</p>
+      <p class="text-sm text-gray-300" id="player-combat-level">Nível -</p>
+      <div class="w-full bg-gray-600 rounded-full h-3 mt-2">
+        <div id="player-combat-hp-bar" class="bg-green-500 h-3 rounded-full transition-all duration-300" style="width: 100%;"></div>
+      </div>
+      <p class="text-xs text-gray-300 mt-1">HP <span id="player-combat-hp-val">0/0</span></p>
+      <div class="w-full bg-gray-600 rounded-full h-3 mt-2">
+        <div id="player-combat-ki-bar" class="bg-blue-500 h-3 rounded-full transition-all duration-300" style="width: 100%;"></div>
+      </div>
+      <p class="text-xs text-gray-300 mt-1">KI <span id="player-combat-ki-val">0/0</span></p>
+    </div>
 
-// Função para iniciar o listener global que detecta partidas PvP ativas que envolvam o jogador logado
-export function listenForActiveMatches() {
-  auth.onAuthStateChanged(user => {
-    if (!user) return;
+    <span class="text-4xl font-extrabold text-yellow-400 mx-4">X</span>
 
-    const userId = user.uid;
-    const matchesRef = collection(db, 'pvpMatches');
+    <div class="enemy-info flex flex-col items-center bg-gray-700 rounded-lg p-4 w-2/5 relative">
+      <img id="enemy-combat-img" src="imagens/player/placeholder.png" alt="Oponente" class="w-16 h-16 rounded-full border-2 border-red-500 mb-2" />
+      <p class="text-lg font-bold text-red-400" id="enemy-combat-name">-</p>
+      <p class="text-sm text-gray-300" id="enemy-combat-level">Nível -</p>
+      <div class="w-full bg-gray-600 rounded-full h-3 mt-2">
+        <div id="enemy-combat-hp-bar" class="bg-red-500 h-3 rounded-full transition-all duration-300" style="width: 100%;"></div>
+      </div>
+      <p class="text-xs text-gray-300 mt-1">HP <span id="enemy-combat-hp-val">0/0</span></p>
+      <div class="w-full bg-gray-600 rounded-full h-3 mt-2">
+        <div id="enemy-combat-ki-bar" class="bg-blue-500 h-3 rounded-full transition-all duration-300" style="width: 100%;"></div>
+      </div>
+      <p class="text-xs text-gray-300 mt-1">KI <span id="enemy-combat-ki-val">0/0</span></p>
+    </div>
+  </div>
 
-    // Ouve partidas ativas
-    const q = query(matchesRef, where('status', '==', 'active'));
+  <div class="mb-4 flex flex-col items-center">
+    <h4 class="font-bold mb-2">Técnicas</h4>
+    <div id="techniques-list" class="flex gap-2"></div>
+  </div>
 
-    onSnapshot(q, snapshot => {
-      snapshot.forEach(docSnap => {
-        const data = docSnap.data();
-        if (data.player1.uid === userId || data.player2.uid === userId) {
-          loadView('pvp-combat', { matchId: docSnap.id });
-        }
-      });
-    });
-  });
-}
-
-// Carrega a tela PvP com os dados e sincroniza a UI
-export async function loadPvpCombatScreen(params) {
-  if (!params?.matchId) {
-    logMessage("Match ID não informado.", "text-red-500");
-    return;
-  }
-
-  currentPlayerId = auth.currentUser?.uid;
-  if (!currentPlayerId) {
-    logMessage("Usuário não autenticado.", "text-red-500");
-    loadView('login');
-    return;
-  }
-
-  const matchRef = doc(db, "pvpMatches", params.matchId);
-  onSnapshot(matchRef, async snapshot => {
-    if (!snapshot.exists()) {
-      logMessage("Partida não encontrada.", "text-red-500");
-      loadView('combat-selection');
-      return;
-    }
-
-    currentMatch = snapshot.data();
-
-    if (currentMatch.player1.uid === currentPlayerId) {
-      opponentId = currentMatch.player2.uid;
-      await loadPlayersData(currentMatch.player1.uid, currentMatch.player2.uid);
-    } else if (currentMatch.player2.uid === currentPlayerId) {
-      opponentId = currentMatch.player1.uid;
-      await loadPlayersData(currentMatch.player2.uid, currentMatch.player1.uid);
-    } else {
-      logMessage("Você não faz parte desta partida.", "text-red-500");
-      loadView('combat-selection');
-      return;
-    }
-  });
-}
-
-// Carrega dados do jogador e oponente e atualiza a UI do combate
-async function loadPlayersData(playerUid, opponentUid) {
-  const playerDoc = await getDoc(doc(db, "users", playerUid));
-  const opponentDoc = await getDoc(doc(db, "users", opponentUid));
-
-  if (!playerDoc.exists() || !opponentDoc.exists()) {
-    logMessage("Dados do jogador e/ou oponente não encontrados.", "text-red-500");
-    loadView('combat-selection');
-    return;
-  }
-
-  const playerData = playerDoc.data();
-  const opponentData = opponentDoc.data();
-
-  Object.assign(playerStats, playerData);
-
-  updateCombatUI(playerData, opponentData);
-  renderTechniques(playerData.learnedTechniques || []);
-}
-
-// Renderiza dinamicamente os botões das técnicas do player
-function renderTechniques(techniques) {
-  const container = document.getElementById('techniques-list');
-  if (!container) {
-    logMessage("Container de técnicas não encontrado no DOM.", "text-red-500");
-    return;
-  }
-  container.innerHTML = '';
-  techniques.forEach(techId => {
-    const tech = getTechById(techId);
-    if (!tech) return;
-    const btn = document.createElement('button');
-    btn.className = 'bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-white';
-    btn.textContent = tech.name;
-    btn.onclick = () => playerAttack(tech);
-    container.appendChild(btn);
-  });
-}
-
-// Atualiza os dados exibidos (nome, nível, barras etc.) na UI do combate
-export function updateCombatUI(playerData, opponentData) {
-  const safeSetText = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
-  const safeSetWidth = (id, width) => { const el = document.getElementById(id); if (el) el.style.width = width; };
-  const safeSetSrc = (id, src) => { const el = document.getElementById(id); if (el) el.src = src; };
-
-  safeSetText('player-combat-name', playerData.characterName || "Você");
-  safeSetText('player-combat-level', `Nível ${playerData.level || 1}`);
-
-  const playerMaxHealth = playerData.maxHealth || 100;
-  const playerHealth = playerData.health || 0;
-  safeSetText('player-combat-hp-val', `${playerHealth}/${playerMaxHealth}`);
-  safeSetWidth('player-combat-hp-bar', `${(playerHealth / playerMaxHealth) * 100}%`);
-
-  const playerMaxKi = playerData.maxKi || 100;
-  const playerKi = playerData.ki || 0;
-  safeSetText('player-combat-ki-val', `${playerKi}/${playerMaxKi}`);
-  safeSetWidth('player-combat-ki-bar', `${(playerKi / playerMaxKi) * 100}%`);
-
-  safeSetSrc('player-combat-img', playerData.avatarUrl || 'imagens/player/goku-player.png');
-
-  safeSetText('enemy-combat-name', opponentData.characterName || "Oponente");
-  safeSetText('enemy-combat-level', `Nível ${opponentData.level || 1}`);
-
-  const opponentMaxHealth = opponentData.maxHealth || 100;
-  const opponentHealth = opponentData.health || 0;
-  safeSetText('enemy-combat-hp-val', `${opponentHealth}/${opponentMaxHealth}`);
-  safeSetWidth('enemy-combat-hp-bar', `${(opponentHealth / opponentMaxHealth) * 100}%`);
-
-  const opponentMaxKi = opponentData.maxKi || 100;
-  const opponentKi = opponentData.ki || 0;
-  safeSetText('enemy-combat-ki-val', `${opponentKi}/${opponentMaxKi}`);
-  safeSetWidth('enemy-combat-ki-bar', `${(opponentKi / opponentMaxKi) * 100}%`);
-
-  safeSetSrc('enemy-combat-img', opponentData.avatarUrl || 'imagens/player/placeholder.png');
-}
-
-// Lógica do ataque do player na partida PvP
-export async function playerAttack(technique) {
-  if (!currentMatch) {
-    logMessage("Partida não carregada.", "text-red-500");
-    return;
-  }
-  if (!technique || !technique.name) {
-    logMessage("Técnica inválida.", "text-red-500");
-    return;
-  }
-
-  const matchRef = doc(db, "pvpMatches", currentMatch.id);
-  const isPlayer1 = currentMatch.player1.uid === currentPlayerId;
-
-  const damage = technique.power || 5;
-  const opponentHealthPath = isPlayer1 ? "player2.stats.health" : "player1.stats.health";
-
-  const opponentStats = isPlayer1 ? currentMatch.player2.stats : currentMatch.player1.stats;
-  const newHealth = Math.max(0, (opponentStats.health || 100) - damage);
-
-  try {
-    await updateDoc(matchRef, {
-      [opponentHealthPath]: newHealth,
-      turn: isPlayer1 ? currentMatch.player2.uid : currentMatch.player1.uid,
-      updatedAt: new Date()
-    });
-    logMessage(`Você usou ${technique.name} e causou ${damage} de dano!`);
-  } catch (error) {
-    logMessage("Falha ao atacar: " + error.message, "text-red-500");
-  }
-}
-
-// Função que ativa a partida PvP atualizando o status no banco Firebase
-export async function activateMatch(matchIdToActivate) {
-  const matchRef = doc(db, "pvpMatches", matchIdToActivate);
-  try {
-    await updateDoc(matchRef, { status: "active", updatedAt: new Date() });
-    logMessage('[PvP] Partida ativada!');
-  } catch (err) {
-    console.error('[PvP] Erro ao ativar partida:', err);
-  }
-}
+  <div>
+    <h4 class="font-bold mb-2">Log de Combate</h4>
+    <div id="combat-log" class="p-2 bg-gray-800 rounded h-40 overflow-y-auto"></div>
+  </div>
+</div>
