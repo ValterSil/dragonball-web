@@ -143,18 +143,26 @@ export async function activateMatch(matchIdToActivate) {
     await updateDoc(matchRef, { status: "active", updatedAt: new Date() });
     logMessage('[PvP] Partida ativada!');
 
-    if (auth.currentUser) {
-      const uid = auth.currentUser.uid;
-      const matchDataSnapshot = await getDoc(matchRef);
-      if (matchDataSnapshot.exists()) {
-        const data = matchDataSnapshot.data();
+    const matchDataSnapshot = await getDoc(matchRef);
+    if (matchDataSnapshot.exists()) {
+      const data = matchDataSnapshot.data();
+      if (auth.currentUser) {
+        const uid = auth.currentUser.uid;
         if (uid === data.player1.uid || uid === data.player2.uid) {
           window.passedParams = { matchId: matchIdToActivate };
-          // Use loadView para carregar a página e depois mostrar a div
+          
+          // Carrega a view pvp-combat
           loadView('pvp-combat');
-          // Remova o hidden da div após carga completada de view
-          document.getElementById('pvp-combat-screen').classList.remove('hidden');
-          loadPvpCombatScreen(window.passedParams);
+
+          // Aguarda um pouco para garantir DOM e recursos carregados
+          setTimeout(() => {
+            const screen = document.getElementById('pvp-combat-screen');
+            if (screen) {
+              screen.classList.remove('hidden');
+              // Chama função loadPvpCombatScreen com os parâmetros passados
+              loadPvpCombatScreen(window.passedParams);
+            }
+          }, 300); // 300ms pode ser ajustado conforme necessário
         }
       }
     }
@@ -162,3 +170,4 @@ export async function activateMatch(matchIdToActivate) {
     console.error('[PvP] Erro ao ativar partida:', err);
   }
 }
+
