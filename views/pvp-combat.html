@@ -3,47 +3,30 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Dragon Ball Z RPG PvP</title>
+    <title>Combate PvP</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="css/style.css" />
 </head>
-<body class="bg-gray-900 text-white font-sans min-h-screen flex flex-col items-center py-4">
+<body class="bg-gray-900 text-white min-h-screen p-4">
 
-<div class="w-full max-w-4xl bg-gray-800 p-4 rounded-lg shadow-lg">
-    <h2 class="text-3xl font-bold mb-4 text-yellow-400 text-center">Combate PvP</h2>
+    <h2 class="text-2xl font-bold mb-4 text-yellow-400">Combate PvP</h2>
 
-    <!-- STATUS -->
     <div class="flex justify-between mb-4">
         <!-- Player -->
-        <div class="w-1/2 p-2 bg-gray-700 rounded">
+        <div class="w-1/2 p-2 bg-gray-800 rounded">
             <h3 class="font-bold mb-2">Você</h3>
-            <p>HP: <span id="player-health-val">0</span></p>
-            <div class="w-full bg-gray-600 rounded-full h-3 mb-1">
-                <div id="player-health-bar" class="bg-green-500 h-3 rounded-full" style="width:100%"></div>
-            </div>
-            <p>Ki: <span id="player-ki-val">0</span></p>
-            <div class="w-full bg-gray-600 rounded-full h-3 mb-1">
-                <div id="player-ki-bar" class="bg-blue-500 h-3 rounded-full" style="width:100%"></div>
-            </div>
-            <p>Poder: <span id="player-power-val">0</span></p>
+            <p>HP: <span id="player-health">0</span></p>
+            <p>Ki: <span id="player-ki">0</span></p>
+            <p>Poder: <span id="player-power">0</span></p>
         </div>
-
-        <!-- Opponent -->
-        <div class="w-1/2 p-2 bg-gray-700 rounded">
+        <!-- Oponente -->
+        <div class="w-1/2 p-2 bg-gray-800 rounded">
             <h3 class="font-bold mb-2">Oponente</h3>
-            <p>HP: <span id="opponent-health-val">0</span></p>
-            <div class="w-full bg-gray-600 rounded-full h-3 mb-1">
-                <div id="opponent-health-bar" class="bg-red-500 h-3 rounded-full" style="width:100%"></div>
-            </div>
-            <p>Ki: <span id="opponent-ki-val">0</span></p>
-            <div class="w-full bg-gray-600 rounded-full h-3 mb-1">
-                <div id="opponent-ki-bar" class="bg-blue-700 h-3 rounded-full" style="width:100%"></div>
-            </div>
-            <p>Poder: <span id="opponent-power-val">0</span></p>
+            <p>HP: <span id="opponent-health">0</span></p>
+            <p>Ki: <span id="opponent-ki">0</span></p>
+            <p>Poder: <span id="opponent-power">0</span></p>
         </div>
     </div>
 
-    <!-- TÉCNICAS -->
     <div class="mb-4">
         <h3 class="font-bold mb-2">Técnicas</h3>
         <div id="techniques-list" class="flex gap-2">
@@ -53,65 +36,59 @@
         </div>
     </div>
 
-    <!-- LOG -->
     <div>
         <h3 class="font-bold mb-2">Log de Combate</h3>
         <div id="combat-log" class="p-2 bg-gray-800 rounded h-40 overflow-y-auto"></div>
     </div>
-</div>
 
-<!-- SCRIPTS -->
-<script type="module">
-import { playerStats, updateCombatUI, logMessage, playerAttack, loadPvpCombatScreen } from './pvpCombat.js';
+    <script type="module">
+        import { playerStats, updateCombatUI, logMessage, playerAttack, loadPvpCombatScreen } from './pvpCombat.js';
 
-// Inicializa elementos do DOM
-const playerHealthBar = document.getElementById('player-health-bar');
-const playerHealthVal = document.getElementById('player-health-val');
-const playerKiBar = document.getElementById('player-ki-bar');
-const playerKiVal = document.getElementById('player-ki-val');
-const playerPowerVal = document.getElementById('player-power-val');
+        const playerHealthEl = document.getElementById('player-health');
+        const playerKiEl = document.getElementById('player-ki');
+        const playerPowerEl = document.getElementById('player-power');
 
-const opponentHealthBar = document.getElementById('opponent-health-bar');
-const opponentHealthVal = document.getElementById('opponent-health-val');
-const opponentKiBar = document.getElementById('opponent-ki-bar');
-const opponentKiVal = document.getElementById('opponent-ki-val');
-const opponentPowerVal = document.getElementById('opponent-power-val');
+        const opponentHealthEl = document.getElementById('opponent-health');
+        const opponentKiEl = document.getElementById('opponent-ki');
+        const opponentPowerEl = document.getElementById('opponent-power');
 
-function refreshStats(opponentStats) {
-    // Player
-    playerHealthVal.textContent = playerStats.health;
-    playerKiVal.textContent = playerStats.ki;
-    playerPowerVal.textContent = playerStats.power;
+        function refreshStats(opponentStats) {
+            playerHealthEl.textContent = playerStats.health;
+            playerKiEl.textContent = playerStats.ki;
+            playerPowerEl.textContent = playerStats.power;
 
-    playerHealthBar.style.width = `${Math.max(0, (playerStats.health / playerStats.maxHealth) * 100)}%`;
-    playerKiBar.style.width = `${Math.max(0, (playerStats.ki / playerStats.maxKi) * 100)}%`;
+            opponentHealthEl.textContent = opponentStats.health;
+            opponentKiEl.textContent = opponentStats.ki;
+            opponentPowerEl.textContent = opponentStats.power;
+        }
 
-    // Opponent
-    opponentHealthVal.textContent = opponentStats.health;
-    opponentKiVal.textContent = opponentStats.ki;
-    opponentPowerVal.textContent = opponentStats.power;
+        window.updateCombatUI = function(opponentStats) {
+            refreshStats(opponentStats);
 
-    opponentHealthBar.style.width = `${Math.max(0, (opponentStats.health / opponentStats.maxHealth) * 100)}%`;
-    opponentKiBar.style.width = `${Math.max(0, (opponentStats.ki / opponentStats.maxKi) * 100)}%`;
-}
+            const logDiv = document.getElementById('combat-log');
+            logDiv.innerHTML = logDiv.innerHTML || '';
+        };
 
-// Torna as funções globais para botões HTML
-window.updateCombatUI = function(opponentStats) {
-    refreshStats(opponentStats);
-};
+        window.logMessage = function(message) {
+            const logDiv = document.getElementById('combat-log');
+            const p = document.createElement('p');
+            p.textContent = message;
+            logDiv.appendChild(p);
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log("[LOG PvP]", message);
+        };
 
-window.logMessage = logMessage;
+        window.playerAttack = async function(technique) {
+            if (!technique) return;
+            logMessage(`Você usou ${technique.name}!`);
+            await playerAttack(technique);
+        };
 
-window.playerAttack = async function(technique) {
-    if (!technique) return;
-    logMessage(`Você usou ${technique.name}!`);
-    await playerAttack(technique);
-};
-
-// Passa parâmetros da partida
-window.passedParams = { matchId: 'ID_DA_PARTIDA' };
-loadPvpCombatScreen(window.passedParams);
-</script>
+        // Simulação: inicializa PvP com log
+        window.passedParams = { matchId: 'ID_DA_PARTIDA' };
+        logMessage("Chamando loadPvpCombatScreen com matchId: ID_DA_PARTIDA");
+        loadPvpCombatScreen(window.passedParams);
+    </script>
 
 </body>
 </html>
