@@ -1,8 +1,6 @@
 // pvpCombat.js
-import { auth } from './auth.js';
+import { auth, db } from './auth.js'; // ✅ importar db direto de auth.js
 import { doc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
-//boo
-const db = window.firebaseDb;
 
 let matchId = null;
 let matchRef = null;
@@ -151,13 +149,14 @@ export function onMatchAccepted(matchIdFromInvite) {
 }
 
 // ✅ Função que o challenges.js espera
-export function activateMatch(matchIdToActivate) {
+export async function activateMatch(matchIdToActivate) {
     logMessage(`[PvP] Ativando partida ${matchIdToActivate}`);
     const matchRefLocal = doc(db, "pvpMatches", matchIdToActivate);
-    updateDoc(matchRefLocal, { status: "active", updatedAt: new Date() })
-        .then(() => {
-            logMessage('[PvP] Partida ativada!');
-            onMatchAccepted(matchIdToActivate);
-        })
-        .catch(err => console.error('[PvP] Erro ao ativar partida:', err));
+    try {
+        await updateDoc(matchRefLocal, { status: "active", updatedAt: new Date() });
+        logMessage('[PvP] Partida ativada!');
+        onMatchAccepted(matchIdToActivate);
+    } catch (err) {
+        console.error('[PvP] Erro ao ativar partida:', err);
+    }
 }
