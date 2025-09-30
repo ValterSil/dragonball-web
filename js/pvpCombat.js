@@ -6,7 +6,6 @@ let currentMatch = null;
 let currentPlayerId = null;
 let opponentId = null;
 
-// Carrega e inicializa a tela PvP com os dados da partida
 export async function loadPvpCombatScreen(params) {
   if (!params?.matchId) {
     logMessage("Match ID não informado.", "text-red-500");
@@ -21,7 +20,7 @@ export async function loadPvpCombatScreen(params) {
   }
 
   const matchRef = doc(db, "pvpMatches", params.matchId);
-  onSnapshot(matchRef, async snapshot => {
+  onSnapshot(matchRef, async (snapshot) => {
     if (!snapshot.exists()) {
       logMessage("Partida não encontrada.", "text-red-500");
       loadView('combat-selection');
@@ -44,7 +43,6 @@ export async function loadPvpCombatScreen(params) {
   });
 }
 
-// Carrega dados do player e oponente e atualiza UI
 async function loadPlayersData(playerUid, opponentUid) {
   const playerDoc = await getDoc(doc(db, "users", playerUid));
   const opponentDoc = await getDoc(doc(db, "users", opponentUid));
@@ -58,28 +56,25 @@ async function loadPlayersData(playerUid, opponentUid) {
   const playerData = playerDoc.data();
   const opponentData = opponentDoc.data();
 
-  // Atualiza dados principais do player global
   Object.assign(playerStats, playerData);
 
   updateCombatUI(playerData, opponentData);
 }
 
-// Atualiza as barras, nomes e imagens da UI
 export function updateCombatUI(playerData, opponentData) {
-  function safeSetText(id, text){
+  function safeSetText(id, text) {
     const elem = document.getElementById(id);
-    if(elem) elem.textContent = text;
+    if (elem) elem.textContent = text;
   }
-  function safeSetWidth(id, width){
+  function safeSetWidth(id, width) {
     const elem = document.getElementById(id);
-    if(elem) elem.style.width = width;
+    if (elem) elem.style.width = width;
   }
-  function safeSetSrc(id, src){
+  function safeSetSrc(id, src) {
     const elem = document.getElementById(id);
-    if(elem) elem.src = src;
+    if (elem) elem.src = src;
   }
 
-  // jogador
   safeSetText('player-combat-name', playerData.characterName || "Você");
   safeSetText('player-combat-level', `Nível ${playerData.level || 1}`);
 
@@ -95,7 +90,6 @@ export function updateCombatUI(playerData, opponentData) {
 
   safeSetSrc('player-combat-img', playerData.avatarUrl || 'imagens/player/goku-player.png');
 
-  // oponente
   safeSetText('enemy-combat-name', opponentData.characterName || "Oponente");
   safeSetText('enemy-combat-level', `Nível ${opponentData.level || 1}`);
 
@@ -112,7 +106,6 @@ export function updateCombatUI(playerData, opponentData) {
   safeSetSrc('enemy-combat-img', opponentData.avatarUrl || 'imagens/player/placeholder.png');
 }
 
-// Funcionalidade para atacar
 export async function playerAttack(technique) {
   if (!currentMatch) {
     logMessage("Partida não carregada.", "text-red-500");
@@ -126,7 +119,6 @@ export async function playerAttack(technique) {
   const matchRef = doc(db, "pvpMatches", currentMatch.id);
   const isPlayer1 = currentMatch.player1.uid === currentPlayerId;
 
-  // Simplificado: calcula dano simples
   const damage = technique.power || 5;
   const opponentHealthPath = isPlayer1 ? "player2.stats.health" : "player1.stats.health";
 
@@ -145,26 +137,24 @@ export async function playerAttack(technique) {
   }
 }
 
-// Ativa a partida e redireciona ambos jogadores para a tela PvP
 export async function activateMatch(matchIdToActivate) {
   const matchRef = doc(db, "pvpMatches", matchIdToActivate);
   try {
     await updateDoc(matchRef, { status: "active", updatedAt: new Date() });
     logMessage('[PvP] Partida ativada!');
 
-    const matchDataSnapshot = await getDoc(matchRef);
-    if (matchDataSnapshot.exists()) {
-      const data = matchDataSnapshot.data();
-      if (auth.currentUser) {
-        const uid = auth.currentUser.uid;
+    if (auth.currentUser) {
+      const uid = auth.currentUser.uid;
+      const matchDataSnapshot = await getDoc(matchRef);
+      if (matchDataSnapshot.exists()) {
+        const data = matchDataSnapshot.data();
         if (uid === data.player1.uid || uid === data.player2.uid) {
           window.passedParams = { matchId: matchIdToActivate };
+          // Use loadView para carregar a página e depois mostrar a div
           loadView('pvp-combat');
-          document.addEventListener('DOMContentLoaded', () => {
-            const screen = document.getElementById('pvp-combat-screen');
-            if (screen) screen.classList.remove('hidden');
-            loadPvpCombatScreen(window.passedParams);
-          });
+          // Remova o hidden da div após carga completada de view
+          document.getElementById('pvp-combat-screen').classList.remove('hidden');
+          loadPvpCombatScreen(window.passedParams);
         }
       }
     }
