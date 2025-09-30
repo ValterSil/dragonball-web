@@ -1,4 +1,4 @@
-import { listenForActiveMatches } from './js/pvpCombat.js';
+import { listenForActiveMatches } from './pvpCombat.js';
 
 // --- Configurações e Estado do Jogo ---
 
