@@ -145,6 +145,7 @@ export function logMessage(message, className = 'text-gray-300') {
 }
 
 export async function loadView(viewName, viewParams = {}) {
+  window.passedParams = viewParams;
   if (combatState.isActive && viewName !== 'arena') {
     logMessage(
       'Você não pode sair do combate enquanto ele estiver ativo!',
