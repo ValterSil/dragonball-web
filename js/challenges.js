@@ -1,7 +1,9 @@
 import { auth, db } from './auth.js';
-import { doc, collection, getDocs, query, where, updateDoc, setDoc, arrayUnion, onSnapshot } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+import { doc, collection, getDocs, query, where, updateDoc, setDoc, arrayUnion, onSnapshot, Timestamp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 import { loadView, playerStats } from './main.js';
 import { activateMatch } from './pvpCombat.js';
+
+const ONLINE_TIMEOUT_MINUTES = 5; // definir timeout para considerar jogador online
 
 export async function loadChallengesScreen() {
   const user = auth.currentUser;
@@ -15,7 +17,10 @@ export async function loadChallengesScreen() {
   `;
 
   const usersRef = collection(db, "users");
-  const q = query(usersRef, where("online", "==", true));
+  // Considere online só se lastActive for nos últimos ONLINE_TIMEOUT_MINUTES
+  const timeoutDate = new Date(Date.now() - ONLINE_TIMEOUT_MINUTES * 60 * 1000);
+  const q = query(usersRef, where("lastActive", ">", Timestamp.fromDate(timeoutDate)));
+
   const snapshot = await getDocs(q);
 
   const listDiv = document.getElementById('players-list');
@@ -61,7 +66,7 @@ function listenForInvites(currentUserId) {
     if (invite.from !== currentUserId) { 
       const accept = confirm(`Você recebeu um convite de duelo! Aceitar?`);
       if (accept) {
-        // ✅ Criar match e ativar
+        // Criar match e ativar
         const matchId = await startPvpMatch(currentUserId, invite.from);
         await activateMatch(matchId);
       }
@@ -75,6 +80,7 @@ let currentMatchId = null;
 export async function startPvpMatch(player1Id, player2Id) {
   const matchRef = doc(collection(db, "pvpMatches"));
 
+  // Carregar stats atuais para ambos jogadores do Firestore, para refletir estados reais (simplificação usa playerStats para ambos abaixo)
   const initialStats = {
     health: playerStats.health || 100,
     ki: playerStats.ki || 50,
@@ -93,17 +99,23 @@ export async function startPvpMatch(player1Id, player2Id) {
   });
 
   currentMatchId = matchRef.id;
-  listenMatchStart(currentMatchId);
+  listenMatchStart(currentMatchId, player1Id, player2Id);
   return currentMatchId;
 }
 
-function listenMatchStart(matchId) {
+function listenMatchStart(matchId, player1Id, player2Id) {
   const matchDoc = doc(db, "pvpMatches", matchId);
   onSnapshot(matchDoc, snapshot => {
     if (!snapshot.exists()) return;
     const data = snapshot.data();
     if (data.status === 'active') {
-      loadView('pvp-combat', { matchId });
+      // Redireciona ambos jogadores para a tela PvP
+      if (auth.currentUser) {
+        const currentUserId = auth.currentUser.uid;
+        if (currentUserId === player1Id || currentUserId === player2Id) {
+          loadView('pvp-combat', { matchId });
+        }
+      }
     }
   });
 }
