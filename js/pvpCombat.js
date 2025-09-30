@@ -1,162 +1,114 @@
-// pvpCombat.js
-import { auth, db } from './auth.js'; // ✅ importar db direto de auth.js
-import { doc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
-
-let matchId = null;
-let matchRef = null;
+import { auth, db } from './auth.js';
+import { doc, getDoc, onSnapshot, updateDoc, Timestamp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+import { playerStats, logMessage, loadView } from './main.js';
+//val
+let currentMatch = null;
 let currentPlayerId = null;
 let opponentId = null;
-let matchData = null;
 
-// Inicializa playerStats global se não existir
-if (!window.playerStats) {
-    window.playerStats = {
-        health: 100,
-        ki: 50,
-        power: 10,
-        defense: 5,
-        upgrades: {}
-    };
-}
+export async function loadPvpCombatScreen(params) {
+  if (!params?.matchId) {
+    logMessage("Match ID não informado.", "text-red-500");
+    return;
+  }
 
-// Função de log para debug
-export function logMessage(message) {
-    const logDiv = document.getElementById('combat-log');
-    if (logDiv) {
-        const p = document.createElement('p');
-        p.textContent = message;
-        logDiv.appendChild(p);
-        logDiv.scrollTop = logDiv.scrollHeight;
+  currentPlayerId = auth.currentUser?.uid;
+  if (!currentPlayerId) {
+    logMessage("Usuário não autenticado.", "text-red-500");
+    loadView('login');
+    return;
+  }
+
+  const matchRef = doc(db, "pvpMatches", params.matchId);
+  
+  onSnapshot(matchRef, async snapshot => {
+    if (!snapshot.exists()) {
+      logMessage("Partida não encontrada.", "text-red-500");
+      loadView('combat-selection');
+      return;
     }
-    console.log('[PvP Log]', message);
+
+    currentMatch = snapshot.data();
+
+    // Identifica o oponente
+    if (currentMatch.player1.uid === currentPlayerId) {
+      opponentId = currentMatch.player2.uid;
+      updateStatsDisplay(currentMatch.player1.stats, currentMatch.player2.stats);
+    } else if (currentMatch.player2.uid === currentPlayerId) {
+      opponentId = currentMatch.player1.uid;
+      updateStatsDisplay(currentMatch.player2.stats, currentMatch.player1.stats);
+    } else {
+      logMessage("Você não faz parte desta partida.", "text-red-500");
+      loadView('combat-selection');
+      return;
+    }
+  });
 }
 
-// Atualiza a UI do combate
-export function updateCombatUI(opponentStats) {
-    if (!opponentStats) return;
+function updateStatsDisplay(playerStatsData, opponentStatsData) {
+  const playerHP = document.getElementById('player-health');
+  const playerKi = document.getElementById('player-ki');
+  const playerPower = document.getElementById('player-power');
 
-    const { health, ki, power } = window.playerStats;
+  const opponentHP = document.getElementById('opponent-health');
+  const opponentKi = document.getElementById('opponent-ki');
+  const opponentPower = document.getElementById('opponent-power');
 
-    const playerHealthEl = document.getElementById('player-health');
-    const playerKiEl = document.getElementById('player-ki');
-    const playerPowerEl = document.getElementById('player-power');
+  if(playerHP) playerHP.textContent = playerStatsData.health;
+  if(playerKi) playerKi.textContent = playerStatsData.ki;
+  if(playerPower) playerPower.textContent = playerStatsData.power;
 
-    const opponentHealthEl = document.getElementById('opponent-health');
-    const opponentKiEl = document.getElementById('opponent-ki');
-    const opponentPowerEl = document.getElementById('opponent-power');
-
-    if (playerHealthEl) playerHealthEl.textContent = health;
-    if (playerKiEl) playerKiEl.textContent = ki;
-    if (playerPowerEl) playerPowerEl.textContent = power;
-
-    if (opponentHealthEl) opponentHealthEl.textContent = opponentStats.health;
-    if (opponentKiEl) opponentKiEl.textContent = opponentStats.ki;
-    if (opponentPowerEl) opponentPowerEl.textContent = opponentStats.power;
-
-    logMessage('[updateCombatUI] UI atualizada');
+  if(opponentHP) opponentHP.textContent = opponentStatsData.health;
+  if(opponentKi) opponentKi.textContent = opponentStatsData.ki;
+  if(opponentPower) opponentPower.textContent = opponentStatsData.power;
 }
 
-// Carrega a tela PvP
-export function loadPvpCombatScreen(params) {
-    if (!params || !params.matchId) return;
+export async function playerAttack(technique) {
+  if (!currentMatch) {
+    logMessage("Partida não carregada.", "text-red-500");
+    return;
+  }
 
-    matchId = params.matchId;
-    currentPlayerId = auth.currentUser.uid;
-    matchRef = doc(db, "pvpMatches", matchId);
+  if (!technique || !technique.name) {
+    logMessage("Técnica inválida.", "text-red-500");
+    return;
+  }
 
-    const screen = document.getElementById('pvp-combat-screen');
-    if (screen) screen.classList.remove('hidden');
+  const matchRef = doc(db, "pvpMatches", currentMatch.id);
+  try {
+    // Atualizar estado no Firestore (simplificação; lógica real de dano deve ser implementada)
+    const newHealth = Math.max(0, currentMatch.player1.stats.health - (technique.power || 5));
+    // Determina se o jogador é player1 ou player2 para atualizar o correto
+    const isPlayer1 = currentMatch.player1.uid === currentPlayerId;
 
-    logMessage(`[PvP] Carregando tela PvP para matchId=${matchId}`);
+    const updateField = isPlayer1 ? "player1.stats.health" : "player2.stats.health";
 
-    // Listener único que cobre aceitação e updates do combate
-    onSnapshot(matchRef, snapshot => {
-        matchData = snapshot.data();
-        if (!matchData) return;
-
-        // Determina o oponente
-        opponentId = matchData.player1.uid === currentPlayerId
-            ? matchData.player2.uid
-            : matchData.player1.uid;
-
-        const localPlayerStats = matchData.player1.uid === currentPlayerId
-            ? matchData.player1.stats
-            : matchData.player2.stats;
-
-        const opponentStats = matchData.player1.uid === currentPlayerId
-            ? matchData.player2.stats
-            : matchData.player1.stats;
-
-        // Atualiza stats do jogador local
-        window.playerStats.health = localPlayerStats.health;
-        window.playerStats.ki = localPlayerStats.ki;
-        window.playerStats.power = localPlayerStats.power;
-        window.playerStats.defense = localPlayerStats.defense;
-        window.playerStats.upgrades = { ...localPlayerStats.upgrades };
-
-        updateCombatUI(opponentStats);
-
-        // Verifica status do match
-        if (matchData.status === "accepted") {
-            logMessage('[PvP] Ambos jogadores prontos. Combate iniciado!');
-        }
-
-        if (matchData.status === "finished") {
-            logMessage('[PvP] Partida finalizada!');
-            alert("Partida finalizada!");
-            if (screen) screen.classList.add('hidden');
-        }
+    await updateDoc(matchRef, {
+      [updateField]: newHealth,
+      updatedAt: new Date()
     });
-}
 
-// Ataque do jogador
-export async function playerAttack(selectedTechnique) {
-    if (!matchData || matchData.turn !== currentPlayerId) {
-        logMessage('[PvP] Não é seu turno ainda!');
-        return;
-    }
-
-    if (matchData.status === "finished") {
-        logMessage('[PvP] A partida já acabou!');
-        return;
-    }
-
-    const opponentStats = matchData.player1.uid === currentPlayerId
-        ? matchData.player2.stats
-        : matchData.player1.stats;
-
-    const damage = (selectedTechnique.power || 10) - (opponentStats.defense || 0);
-    opponentStats.health -= Math.max(damage, 0);
-
-    updateCombatUI(opponentStats);
-
-    const newTurn = opponentId;
-
-    const update = matchData.player1.uid === currentPlayerId
-        ? { "player2.stats": opponentStats, turn: newTurn, updatedAt: new Date() }
-        : { "player1.stats": opponentStats, turn: newTurn, updatedAt: new Date() };
-
-    await updateDoc(matchRef, update);
-
-    logMessage(`Você usou ${selectedTechnique.name} e causou ${Math.max(damage, 0)} de dano!`);
+    logMessage(`Você usou ${technique.name} e causou dano!`);
+  } catch (error) {
+    logMessage("Falha ao atacar: " + error.message, "text-red-500");
+  }
 }
 
 // Função chamada externamente ao aceitar convite
 export function onMatchAccepted(matchIdFromInvite) {
-    logMessage('[PvP] Convite aceito! Abrindo tela de combate...');
-    window.passedParams = { matchId: matchIdFromInvite };
-    loadPvpCombatScreen(window.passedParams);
+  logMessage('[PvP] Convite aceito! Abrindo tela de combate...');
+  window.passedParams = { matchId: matchIdFromInvite };
+  loadPvpCombatScreen(window.passedParams);
 }
 
-// ✅ Função que o challenges.js espera
+// Ativa uma partida PvP (chamada pelo challenges.js)
 export async function activateMatch(matchIdToActivate) {
-    logMessage(`[PvP] Ativando partida ${matchIdToActivate}`);
-    const matchRefLocal = doc(db, "pvpMatches", matchIdToActivate);
-    try {
-        await updateDoc(matchRefLocal, { status: "active", updatedAt: new Date() });
-        logMessage('[PvP] Partida ativada!');
-        onMatchAccepted(matchIdToActivate);
-    } catch (err) {
-        console.error('[PvP] Erro ao ativar partida:', err);
-    }
+  const matchRef = doc(db, "pvpMatches", matchIdToActivate);
+  try {
+    await updateDoc(matchRef, { status: "active", updatedAt: new Date() });
+    logMessage('[PvP] Partida ativada!');
+    onMatchAccepted(matchIdToActivate);
+  } catch (err) {
+    console.error('[PvP] Erro ao ativar partida:', err);
+  }
 }
