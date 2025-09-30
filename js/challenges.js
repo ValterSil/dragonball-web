@@ -3,7 +3,7 @@ import { doc, collection, getDocs, query, where, updateDoc, setDoc, arrayUnion, 
 import { loadView, playerStats } from './main.js';
 import { activateMatch } from './pvpCombat.js';
 
-const ONLINE_TIMEOUT_MINUTES = 5; // Considere jogador online se ativo nos últimos 5 minutos
+const ONLINE_TIMEOUT_MINUTES = 5; // Intervalo para considerar jogador online
 
 export async function loadChallengesScreen() {
   const user = auth.currentUser;
@@ -16,27 +16,36 @@ export async function loadChallengesScreen() {
     <div id="players-list"></div>
   `;
 
-  // Atualiza lastActive do usuário atual para "manter online"
-  const userRef = doc(db, "users", currentUserId);
-  await updateDoc(userRef, { lastActive: Timestamp.now() });
+  // Atualiza lastActive do jogador atual para manter online
+  try {
+    const userRef = doc(db, "users", currentUserId);
+    await updateDoc(userRef, { lastActive: Timestamp.now() });
+  } catch (error) {
+    console.error("Erro ao atualizar lastActive:", error);
+  }
 
   const usersRef = collection(db, "users");
   const timeoutDate = new Date(Date.now() - ONLINE_TIMEOUT_MINUTES * 60 * 1000);
   const q = query(usersRef, where("lastActive", ">", Timestamp.fromDate(timeoutDate)));
 
-  const snapshot = await getDocs(q);
+  try {
+    const snapshot = await getDocs(q);
+    const listDiv = document.getElementById('players-list');
+    listDiv.innerHTML = ''; // Limpa lista existente
 
-  const listDiv = document.getElementById('players-list');
-  snapshot.forEach(docSnap => {
-    if (docSnap.id !== currentUserId) {
-      const player = docSnap.data();
-      const btn = document.createElement('button');
-      btn.textContent = player.characterName || "Jogador";
-      btn.className = "block w-full mb-2 p-2 bg-blue-600 hover:bg-blue-700 text-white rounded";
-      btn.onclick = () => invitePlayer(docSnap.id, player.characterName || "Jogador");
-      listDiv.appendChild(btn);
-    }
-  });
+    snapshot.forEach(docSnap => {
+      if (docSnap.id !== currentUserId) {
+        const player = docSnap.data();
+        const btn = document.createElement('button');
+        btn.textContent = player.characterName || "Jogador";
+        btn.className = "block w-full mb-2 p-2 bg-blue-600 hover:bg-blue-700 text-white rounded";
+        btn.onclick = () => invitePlayer(docSnap.id, player.characterName || "Jogador");
+        listDiv.appendChild(btn);
+      }
+    });
+  } catch (error) {
+    console.error("Erro ao buscar jogadores online:", error);
+  }
 
   listenForInvites(currentUserId);
 }
@@ -66,7 +75,7 @@ function listenForInvites(currentUserId) {
     if (!data?.invites?.length) return;
 
     const invite = data.invites[0];
-    if (invite.from !== currentUserId) {
+    if (invite.from !== currentUserId) { 
       const accept = confirm(`Você recebeu um convite de duelo! Aceitar?`);
       if (accept) {
         const matchId = await startPvpMatch(currentUserId, invite.from);
@@ -82,6 +91,7 @@ let currentMatchId = null;
 export async function startPvpMatch(player1Id, player2Id) {
   const matchRef = doc(collection(db, "pvpMatches"));
 
+  // Stats iniciais - aqui usa o playerStats que deve estar atualizado
   const initialStats = {
     health: playerStats.health || 100,
     ki: playerStats.ki || 50,
