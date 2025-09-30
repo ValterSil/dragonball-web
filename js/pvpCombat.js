@@ -11,32 +11,26 @@ let currentPlayerId = null;
 let opponentId = null;
 let matchData = null;
 
-export function updateCombatUI(opponentStats = window.passedParams) {
-    if (!opponentStats) return; // evita erro se não tiver parâmetros
+export function updateCombatUI(opponentStats) {
+    if (!opponentStats) return;
 
-    // Atualiza HP
-    const enemyHpBar = document.getElementById('opponent-health-bar');
-    const enemyHpVal = document.getElementById('opponent-health-val');
-    if (enemyHpBar && enemyHpVal) {
-        const hpPercent = (opponentStats.health / opponentStats.maxHealth) * 100;
-        enemyHpBar.style.width = `${Math.max(0, hpPercent)}%`;
-        enemyHpVal.textContent = `${Math.max(0, Math.floor(opponentStats.health))}/${Math.floor(opponentStats.maxHealth)}`;
-    }
+    // Player
+    const playerHealthEl = document.getElementById('player-health');
+    const playerKiEl = document.getElementById('player-ki');
+    const playerPowerEl = document.getElementById('player-power');
 
-    // Atualiza Ki
-    const enemyKiBar = document.getElementById('opponent-ki-bar');
-    const enemyKiVal = document.getElementById('opponent-ki-val');
-    if (enemyKiBar && enemyKiVal) {
-        const kiPercent = (opponentStats.ki / opponentStats.maxKi) * 100;
-        enemyKiBar.style.width = `${Math.max(0, kiPercent)}%`;
-        enemyKiVal.textContent = `${Math.max(0, Math.floor(opponentStats.ki))}/${Math.floor(opponentStats.maxKi)}`;
-    }
+    if (playerHealthEl) playerHealthEl.textContent = playerStats.health;
+    if (playerKiEl) playerKiEl.textContent = playerStats.ki;
+    if (playerPowerEl) playerPowerEl.textContent = playerStats.power;
 
-    // Nome e Poder
-    const enemyNameVal = document.getElementById('opponent-name-val');
-    const enemyPowerVal = document.getElementById('opponent-power-val');
-    if (enemyNameVal) enemyNameVal.textContent = opponentStats.name || '???';
-    if (enemyPowerVal) enemyPowerVal.textContent = opponentStats.power;
+    // Opponent
+    const opponentHealthEl = document.getElementById('opponent-health');
+    const opponentKiEl = document.getElementById('opponent-ki');
+    const opponentPowerEl = document.getElementById('opponent-power');
+
+    if (opponentHealthEl) opponentHealthEl.textContent = opponentStats.health;
+    if (opponentKiEl) opponentKiEl.textContent = opponentStats.ki;
+    if (opponentPowerEl) opponentPowerEl.textContent = opponentStats.power;
 
     // Log
     const logElement = document.getElementById('combat-log');
@@ -47,6 +41,7 @@ export function updateCombatUI(opponentStats = window.passedParams) {
         logElement.prepend(div);
     }
 }
+
 
 
 export function loadPvpCombatScreen(params) {
