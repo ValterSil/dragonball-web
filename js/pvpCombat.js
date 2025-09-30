@@ -10,102 +10,58 @@ let matchRef = null;
 let currentPlayerId = null;
 let opponentId = null;
 let matchData = null;
-
-export function updateCombatUI(opponentStats) {
-    if (!opponentStats) return;
-
-    const enemyHpBar = document.getElementById('opponent-health-bar');
-    const enemyHpVal = document.getElementById('opponent-health-val');
-    if (enemyHpBar && enemyHpVal) {
-        const hpPercent = (opponentStats.health / opponentStats.maxHealth) * 100;
-        enemyHpBar.style.width = `${Math.max(0, hpPercent)}%`;
-        enemyHpVal.textContent = `${Math.max(0, Math.floor(opponentStats.health))}/${Math.floor(opponentStats.maxHealth)}`;
-    }
-
-    const enemyKiBar = document.getElementById('opponent-ki-bar');
-    const enemyKiVal = document.getElementById('opponent-ki-val');
-    if (enemyKiBar && enemyKiVal) {
-        const kiPercent = (opponentStats.ki / opponentStats.maxKi) * 100;
-        enemyKiBar.style.width = `${Math.max(0, kiPercent)}%`;
-        enemyKiVal.textContent = `${Math.max(0, Math.floor(opponentStats.ki))}/${Math.floor(opponentStats.maxKi)}`;
-    }
-
-    const enemyNameVal = document.getElementById('opponent-name-val');
-    const enemyPowerVal = document.getElementById('opponent-power-val');
-    if (enemyNameVal) enemyNameVal.textContent = opponentStats.name || '???';
-    if (enemyPowerVal) enemyPowerVal.textContent = opponentStats.power;
-
-    const logElement = document.getElementById('combat-log');
-    if (logElement) {
-        const div = document.createElement('div');
-        div.className = 'log-message text-gray-300';
-        div.textContent = `📣 Status do inimigo atualizado!`;
-        logElement.prepend(div);
-    }
-}
-
+// val
 export function loadPvpCombatScreen(params) {
-    console.log("loadPvpCombatScreen chamado", params);
-    logMessage("loadPvpCombatScreen chamado com params: " + JSON.stringify(params));
-
-    if (!params.matchId) return;
-
     matchId = params.matchId;
     currentPlayerId = auth.currentUser.uid;
     matchRef = doc(db, "pvpMatches", matchId);
 
-    logMessage("Você entrou na partida PvP! UID: " + currentPlayerId);
+    console.log('[LOG PvP] Listener do match iniciado para matchId:', matchId);
 
     onSnapshot(matchRef, snapshot => {
         matchData = snapshot.data();
-        console.log("Snapshot recebido:", matchData);
-        logMessage("Snapshot recebido: " + JSON.stringify(matchData));
+        if (!matchData) return;
 
-        if (!matchData) {
-            logMessage("Erro: matchData indefinido!");
-            return;
-        }
+        console.log('[LOG PvP] Snapshot recebido:', matchData);
 
         opponentId = matchData.player1.uid === currentPlayerId ? matchData.player2.uid : matchData.player1.uid;
-        logMessage("Oponente identificado: " + opponentId);
 
         const localPlayerStats = matchData.player1.uid === currentPlayerId ? matchData.player1.stats : matchData.player2.stats;
         const opponentStats = matchData.player1.uid === currentPlayerId ? matchData.player2.stats : matchData.player1.stats;
 
-        Object.assign(playerStats, localPlayerStats);
-        logMessage("Stats do jogador local atualizados: " + JSON.stringify(playerStats));
+        // Atualiza stats locais
+        playerStats.health = localPlayerStats.health;
+        playerStats.ki = localPlayerStats.ki;
+        playerStats.power = localPlayerStats.power;
+        playerStats.defense = localPlayerStats.defense;
+        playerStats.upgrades = { ...localPlayerStats.upgrades };
 
+        // Atualiza UI
         updateCombatUI(opponentStats);
 
-        if (matchData.player2Accepted && !matchData.started) {
-            logMessage("O oponente aceitou o convite! A batalha começou!");
-            // Aqui você pode chamar qualquer função de inicialização de UI de combate
-        }
-
-        if (matchData.turn === currentPlayerId) {
-            logMessage("É a sua vez!");
+        // Logs detalhados
+        if (matchData.status === "accepted") {
+            window.logMessage('Oponente aceitou o convite! Combate iniciado.');
+        } else if (matchData.status === "finished") {
+            window.logMessage('Partida finalizada!');
+            alert('Partida finalizada!');
         } else {
-            logMessage("É a vez do oponente!");
-        }
-
-        if (matchData.status === "finished") {
-            logMessage("A partida terminou!");
-            alert("Partida finalizada!");
+            window.logMessage('Aguardando o outro jogador...');
         }
     });
 }
 
 export async function playerAttack(selectedTechnique) {
     if (!matchData || matchData.turn !== currentPlayerId) {
-        logMessage("Não é sua vez ainda!");
+        window.logMessage('Não é sua vez!');
         return;
     }
 
     const opponentStats = matchData.player1.uid === currentPlayerId ? matchData.player2.stats : matchData.player1.stats;
-
     const damage = (selectedTechnique.power || 10) - (opponentStats.defense || 0);
     opponentStats.health -= Math.max(damage, 0);
 
+    window.logMessage(`Você causou ${Math.max(damage, 0)} de dano com ${selectedTechnique.name}!`);
     updateCombatUI(opponentStats);
 
     const newTurn = opponentId;
@@ -115,6 +71,4 @@ export async function playerAttack(selectedTechnique) {
         : { "player1.stats": opponentStats, turn: newTurn, updatedAt: new Date() };
 
     await updateDoc(matchRef, update);
-
-    logMessage(`Você usou ${selectedTechnique.name} e causou ${Math.max(damage, 0)} de dano!`);
 }
