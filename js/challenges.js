@@ -44,15 +44,16 @@ async function invitePlayer(opponentId, opponentName) {
     await updateDoc(inviteRef, {
       invites: arrayUnion({ from: currentUserId, timestamp: new Date() })
     });
-  } catch (err) {
+  } catch {
     await setDoc(inviteRef, { invites: [{ from: currentUserId, timestamp: new Date() }] });
   }
+
   alert(`Convite enviado para ${opponentName}`);
 }
 
 function listenForInvites(currentUserId) {
   const inviteRef = doc(db, "pvpInvites", currentUserId);
-  onSnapshot(inviteRef, async (snapshot) => {
+  onSnapshot(inviteRef, async snapshot => {
     const data = snapshot.data();
     if (!data?.invites?.length) return;
 
@@ -60,11 +61,11 @@ function listenForInvites(currentUserId) {
     if (invite.from !== currentUserId) { 
       const accept = confirm(`Você recebeu um convite de duelo! Aceitar?`);
       if (accept) {
-        // Iniciar a partida e ativar o match
+        // ✅ Criar match e ativar
         const matchId = await startPvpMatch(currentUserId, invite.from);
         await activateMatch(matchId);
       }
-      await updateDoc(inviteRef, { invites: [] });
+      await updateDoc(inviteRef, { invites: [] }).catch(() => {});
     }
   });
 }
@@ -72,8 +73,7 @@ function listenForInvites(currentUserId) {
 let currentMatchId = null;
 
 export async function startPvpMatch(player1Id, player2Id) {
-  const pvpMatchesCollection = collection(db, "pvpMatches");
-  const matchRef = doc(pvpMatchesCollection);
+  const matchRef = doc(collection(db, "pvpMatches"));
 
   const initialStats = {
     health: playerStats.health || 100,
@@ -99,7 +99,7 @@ export async function startPvpMatch(player1Id, player2Id) {
 
 function listenMatchStart(matchId) {
   const matchDoc = doc(db, "pvpMatches", matchId);
-  onSnapshot(matchDoc, (snapshot) => {
+  onSnapshot(matchDoc, snapshot => {
     if (!snapshot.exists()) return;
     const data = snapshot.data();
     if (data.status === 'active') {
