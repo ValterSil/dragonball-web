@@ -8,22 +8,25 @@ import { playerStats, logMessage, loadView, getTechById } from './main.js';
 let currentMatch = null;
 let currentPlayerId = null;
 let opponentId = null;
+let currentLoadedMatchId = null; // novo para controle de recarregamento
 
-// Função para iniciar o listener global que detecta partidas PvP ativas que envolvam o jogador logado
 export function listenForActiveMatches() {
   auth.onAuthStateChanged(user => {
     if (!user) return;
 
     const userId = user.uid;
     const matchesRef = collection(db, 'pvpMatches');
-
-    // Ouve partidas ativas
     const q = query(matchesRef, where('status', '==', 'active'));
 
-    onSnapshot(q, snapshot => {
+    onSnapshot(q, (snapshot) => {
       snapshot.forEach(docSnap => {
         const data = docSnap.data();
         if (data.player1.uid === userId || data.player2.uid === userId) {
+          // Evita recarregar a mesma partida várias vezes
+          if (window.currentView === 'pvp-combat' && currentLoadedMatchId === docSnap.id) {
+            return;
+          }
+          currentLoadedMatchId = docSnap.id;
           loadView('pvp-combat', { matchId: docSnap.id });
         }
       });
@@ -31,7 +34,6 @@ export function listenForActiveMatches() {
   });
 }
 
-// Carrega a tela PvP com os dados e sincroniza a UI
 export async function loadPvpCombatScreen(params) {
   if (!params?.matchId) {
     logMessage("Match ID não informado.", "text-red-500");
@@ -46,7 +48,7 @@ export async function loadPvpCombatScreen(params) {
   }
 
   const matchRef = doc(db, "pvpMatches", params.matchId);
-  onSnapshot(matchRef, async snapshot => {
+  onSnapshot(matchRef, async (snapshot) => {
     if (!snapshot.exists()) {
       logMessage("Partida não encontrada.", "text-red-500");
       loadView('combat-selection');
@@ -69,7 +71,6 @@ export async function loadPvpCombatScreen(params) {
   });
 }
 
-// Carrega dados do jogador e oponente e atualiza a UI do combate
 async function loadPlayersData(playerUid, opponentUid) {
   const playerDoc = await getDoc(doc(db, "users", playerUid));
   const opponentDoc = await getDoc(doc(db, "users", opponentUid));
@@ -89,7 +90,6 @@ async function loadPlayersData(playerUid, opponentUid) {
   renderTechniques(playerData.learnedTechniques || []);
 }
 
-// Renderiza dinamicamente os botões das técnicas do player
 function renderTechniques(techniques) {
   const container = document.getElementById('techniques-list');
   if (!container) {
@@ -108,7 +108,6 @@ function renderTechniques(techniques) {
   });
 }
 
-// Atualiza os dados exibidos (nome, nível, barras etc.) na UI do combate
 export function updateCombatUI(playerData, opponentData) {
   const safeSetText = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
   const safeSetWidth = (id, width) => { const el = document.getElementById(id); if (el) el.style.width = width; };
@@ -145,7 +144,6 @@ export function updateCombatUI(playerData, opponentData) {
   safeSetSrc('enemy-combat-img', opponentData.avatarUrl || 'imagens/player/placeholder.png');
 }
 
-// Lógica do ataque do player na partida PvP
 export async function playerAttack(technique) {
   if (!currentMatch) {
     logMessage("Partida não carregada.", "text-red-500");
@@ -177,12 +175,12 @@ export async function playerAttack(technique) {
   }
 }
 
-// Função que ativa a partida PvP atualizando o status no banco Firebase
 export async function activateMatch(matchIdToActivate) {
   const matchRef = doc(db, "pvpMatches", matchIdToActivate);
   try {
     await updateDoc(matchRef, { status: "active", updatedAt: new Date() });
     logMessage('[PvP] Partida ativada!');
+    // Não redirecionar aqui; listener global fará o redirecionamento
   } catch (err) {
     console.error('[PvP] Erro ao ativar partida:', err);
   }
