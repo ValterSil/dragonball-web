@@ -2,8 +2,7 @@ import { playerStats, logMessage, updateUI, saveLocalState, RACE_DATA, updateCal
 import { getFirestore } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
 
-const db = getFirestore();
-const auth = getAuth();
+import { auth, db } from './auth.js';
 
 let selectedRace = null;
 
