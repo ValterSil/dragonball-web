@@ -1,6 +1,6 @@
 import { playerStats, logMessage, updateUI, saveLocalState, RACE_DATA, updateCalculatedStats, loadView } from './main.js';
 import { getFirestore } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
-import { getAuth } from "firebase/auth";
+import { getAuth } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
 
 const db = getFirestore();
 const auth = getAuth();
