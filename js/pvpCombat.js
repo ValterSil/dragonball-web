@@ -1,7 +1,7 @@
 // pvpCombat.js
 import { auth } from './auth.js';
 import { doc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
-// frio
+//boo
 const db = window.firebaseDb;
 
 let matchId = null;
@@ -148,4 +148,16 @@ export function onMatchAccepted(matchIdFromInvite) {
     logMessage('[PvP] Convite aceito! Abrindo tela de combate...');
     window.passedParams = { matchId: matchIdFromInvite };
     loadPvpCombatScreen(window.passedParams);
+}
+
+// ✅ Função que o challenges.js espera
+export function activateMatch(matchIdToActivate) {
+    logMessage(`[PvP] Ativando partida ${matchIdToActivate}`);
+    const matchRefLocal = doc(db, "pvpMatches", matchIdToActivate);
+    updateDoc(matchRefLocal, { status: "active", updatedAt: new Date() })
+        .then(() => {
+            logMessage('[PvP] Partida ativada!');
+            onMatchAccepted(matchIdToActivate);
+        })
+        .catch(err => console.error('[PvP] Erro ao ativar partida:', err));
 }
