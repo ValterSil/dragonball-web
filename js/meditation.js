@@ -1,5 +1,6 @@
 // meditation.js
 import { playerStats, logMessage, updateUI, saveLocalState, disableActions, updateCalculatedStats, POINTS_PER_LEVEL, XP_TO_LEVEL, combatState } from './main.js';
+import { savePlayerToFirestore } from './playerService.js'; // 🔥 Novo import
 
 /**
  * Inicializa a tela de Meditação.
@@ -56,6 +57,8 @@ export async function meditate() {
 
     updateCalculatedStats(); // Recalcula stats após XP/Level
     saveLocalState();
+
+    await savePlayerToFirestore(); // 🔥 Agora salva no Firestore também
     
     logMessage(`✅ Meditação completa! Você ganhou ${xpGain} XP (Bônus: ${(playerStats.xpMultiplier - 1.0) * 100}%)!`, 'text-green-400');
     if (levelsGained > 0) {
