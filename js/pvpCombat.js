@@ -139,7 +139,16 @@ export async function playerAttack(selectedTechnique) {
 
 // Função que dispara a tela PvP ao aceitar convite
 export function onMatchAccepted(matchIdFromInvite) {
-    window.passedParams = { matchId: matchIdFromInvite };
+    console.log(`[PvP] onMatchAccepted chamado com matchId=${matchIdFromInvite}`);
     logMessage('[PvP] Convite aceito! Abrindo tela de combate...');
+
+    // Marca o matchId para a tela PvP
+    window.passedParams = { matchId: matchIdFromInvite };
+
+    // Carrega a tela de combate
     loadPvpCombatScreen(window.passedParams);
+
+    console.log('[PvP] loadPvpCombatScreen chamado, aguardando snapshots do match...');
+    logMessage('[PvP] Tela de combate carregada, monitorando status do match...');
 }
+
