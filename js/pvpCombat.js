@@ -1,7 +1,6 @@
 import { auth, db } from './auth.js';
 import { doc, getDoc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 import { playerStats, logMessage, loadView } from './main.js';
-/aff
 let currentMatch = null;
 let currentPlayerId = null;
 let opponentId = null;
