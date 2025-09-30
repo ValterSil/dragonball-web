@@ -1,22 +1,38 @@
-<div id="pvp-combat-screen" class="view-content">
+<div id="pvp-combat-screen" class="view-content hidden">
   <button class="back-button" onclick="window.loadView('combat-selection')">← Voltar</button>
   <h3 class="view-title text-yellow-400">Combate PvP</h3>
 
   <div class="flex justify-around mb-4">
     <!-- Jogador -->
-    <div class="w-1/2 p-4 bg-gray-800 rounded flex flex-col items-center">
-      <h4 class="font-bold text-yellow-400 mb-2">Você</h4>
-      <p>HP: <span id="player-health">0</span></p>
-      <p>Ki: <span id="player-ki">0</span></p>
-      <p>Poder: <span id="player-power">0</span></p>
+    <div class="player-info flex flex-col items-center bg-gray-700 rounded-lg p-4 w-2/5 relative">
+      <img id="player-combat-img" src="imagens/player/goku-player.png" alt="Jogador" class="w-16 h-16 rounded-full border-2 border-blue-500 mb-2" />
+      <p class="text-lg font-bold text-blue-400" id="player-combat-name">-</p>
+      <p class="text-sm text-gray-300" id="player-combat-level">Nível -</p>
+      <div class="w-full bg-gray-600 rounded-full h-3 mt-2">
+        <div id="player-combat-hp-bar" class="bg-green-500 h-3 rounded-full transition-all duration-300" style="width: 100%;"></div>
+      </div>
+      <p class="text-xs text-gray-300 mt-1">HP <span id="player-combat-hp-val">0/0</span></p>
+      <div class="w-full bg-gray-600 rounded-full h-3 mt-2">
+        <div id="player-combat-ki-bar" class="bg-blue-500 h-3 rounded-full transition-all duration-300" style="width: 100%;"></div>
+      </div>
+      <p class="text-xs text-gray-300 mt-1">KI <span id="player-combat-ki-val">0/0</span></p>
     </div>
 
+    <span class="text-4xl font-extrabold text-yellow-400 mx-4">X</span>
+
     <!-- Oponente -->
-    <div class="w-1/2 p-4 bg-gray-800 rounded flex flex-col items-center">
-      <h4 class="font-bold text-red-400 mb-2">Oponente</h4>
-      <p>HP: <span id="opponent-health">0</span></p>
-      <p>Ki: <span id="opponent-ki">0</span></p>
-      <p>Poder: <span id="opponent-power">0</span></p>
+    <div class="enemy-info flex flex-col items-center bg-gray-700 rounded-lg p-4 w-2/5 relative">
+      <img id="enemy-combat-img" src="https://via.placeholder.com/64" alt="Oponente" class="w-16 h-16 rounded-full border-2 border-red-500 mb-2" />
+      <p class="text-lg font-bold text-red-400" id="enemy-combat-name">-</p>
+      <p class="text-sm text-gray-300" id="enemy-combat-level">Nível -</p>
+      <div class="w-full bg-gray-600 rounded-full h-3 mt-2">
+        <div id="enemy-combat-hp-bar" class="bg-red-500 h-3 rounded-full transition-all duration-300" style="width: 100%;"></div>
+      </div>
+      <p class="text-xs text-gray-300 mt-1">HP <span id="enemy-combat-hp-val">0/0</span></p>
+      <div class="w-full bg-gray-600 rounded-full h-3 mt-2">
+        <div id="enemy-combat-ki-bar" class="bg-blue-500 h-3 rounded-full transition-all duration-300" style="width: 100%;"></div>
+      </div>
+      <p class="text-xs text-gray-300 mt-1">KI <span id="enemy-combat-ki-val">0/0</span></p>
     </div>
   </div>
 
@@ -24,9 +40,7 @@
   <div class="mb-4 flex flex-col items-center">
     <h4 class="font-bold mb-2">Técnicas</h4>
     <div id="techniques-list" class="flex gap-2">
-      <button class="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-white" onclick="window.playerAttack({ name: 'Soco', power: 10 })">Soco</button>
-      <button class="bg-green-600 hover:bg-green-700 px-3 py-1 rounded text-white" onclick="window.playerAttack({ name: 'Chute', power: 12 })">Chute</button>
-      <button class="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-white" onclick="window.playerAttack({ name: 'Ki Blast', power: 15 })">Ki Blast</button>
+      <!-- Botões dinâmicos gerados pelo JS -->
     </div>
   </div>
 
@@ -36,3 +50,23 @@
     <div id="combat-log" class="p-2 bg-gray-800 rounded h-40 overflow-y-auto"></div>
   </div>
 </div>
+
+<script type="module">
+  import { loadPvpCombatScreen, playerAttack, logMessage, updateCombatUI } from '../js/pvpCombat.js';
+
+  if (window.passedParams?.matchId) {
+    document.getElementById('pvp-combat-screen').classList.remove('hidden');
+    loadPvpCombatScreen(window.passedParams);
+    logMessage('[PvP] Tela de combate carregada');
+  }
+
+  window.playerAttack = async function(technique) {
+    if (!technique) return;
+    logMessage(`Você usou ${technique.name}!`);
+    await playerAttack(technique);
+  };
+
+  window.updateCombatUI = function(playerData, enemyData) {
+    updateCombatUI(playerData, enemyData);
+  };
+</script>
