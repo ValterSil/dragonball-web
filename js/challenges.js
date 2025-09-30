@@ -1,4 +1,3 @@
-// challenges.js
 import { auth } from './auth.js'; 
 import { doc, collection, getDocs, query, where, updateDoc, setDoc, arrayUnion, onSnapshot } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 import { loadView } from './main.js';
@@ -62,11 +61,11 @@ function listenForInvites() {
     });
 }
 
-// Atualizado para criar o documento e guardar o ID
 let currentMatchId = null;
 
 async function startPvpMatch(player1Id, player2Id) {
-    const matchRef = doc(collection(db, "pvpMatches"));
+    const pvpMatchesCollection = collection(db, "pvpMatches");
+    const matchRef = doc(pvpMatchesCollection);
 
     const initialStats = {
         health: playerStats.health || 100,
@@ -80,17 +79,33 @@ async function startPvpMatch(player1Id, player2Id) {
         player1: { uid: player1Id, stats: initialStats, lastActionAt: new Date() },
         player2: { uid: player2Id, stats: initialStats, lastActionAt: new Date() },
         turn: player1Id,
-        status: "active",
+        status: "pending", // inicial como pendente
         createdAt: new Date(),
         updatedAt: new Date()
     });
 
     currentMatchId = matchRef.id;
 
-    // Aqui notificamos ambos jogadores para abrir a view 'pvp-combat'
-    // Você pode usar outro mecanismo para isso, por exemplo firestore onSnapshot no cliente!
-    
-    await loadView('pvp-combat', { matchId: currentMatchId });
+    // Escuta partida para detectar quando status virar 'active' para abrir view
+    listenMatchStart(currentMatchId);
+}
+
+function listenMatchStart(matchId) {
+    const matchDoc = doc(db, "pvpMatches", matchId);
+    onSnapshot(matchDoc, (snapshot) => {
+        if (!snapshot.exists()) return;
+
+        const data = snapshot.data();
+        if (data.status === 'active') {
+            loadView('pvp-combat', { matchId });
+        }
+    });
+}
+
+// Chamado pelo jogador que aceitar o convite para ativar a partida
+export async function activateMatch(matchId) {
+    const matchDoc = doc(db, 'pvpMatches', matchId);
+    await updateDoc(matchDoc, { status: 'active', updatedAt: new Date() });
 }
 
 window.loadChallengesScreen = loadChallengesScreen;
