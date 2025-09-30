@@ -3,7 +3,7 @@ import { doc, collection, getDocs, query, where, updateDoc, setDoc, arrayUnion, 
 import { loadView, playerStats } from './main.js';
 import { activateMatch } from './pvpCombat.js';
 
-const ONLINE_TIMEOUT_MINUTES = 5; // definir timeout para considerar jogador online
+const ONLINE_TIMEOUT_MINUTES = 5; // Considere jogador online se ativo nos últimos 5 minutos
 
 export async function loadChallengesScreen() {
   const user = auth.currentUser;
@@ -16,8 +16,11 @@ export async function loadChallengesScreen() {
     <div id="players-list"></div>
   `;
 
+  // Atualiza lastActive do usuário atual para "manter online"
+  const userRef = doc(db, "users", currentUserId);
+  await updateDoc(userRef, { lastActive: Timestamp.now() });
+
   const usersRef = collection(db, "users");
-  // Considere online só se lastActive for nos últimos ONLINE_TIMEOUT_MINUTES
   const timeoutDate = new Date(Date.now() - ONLINE_TIMEOUT_MINUTES * 60 * 1000);
   const q = query(usersRef, where("lastActive", ">", Timestamp.fromDate(timeoutDate)));
 
@@ -25,8 +28,8 @@ export async function loadChallengesScreen() {
 
   const listDiv = document.getElementById('players-list');
   snapshot.forEach(docSnap => {
-    const player = docSnap.data();
     if (docSnap.id !== currentUserId) {
+      const player = docSnap.data();
       const btn = document.createElement('button');
       btn.textContent = player.characterName || "Jogador";
       btn.className = "block w-full mb-2 p-2 bg-blue-600 hover:bg-blue-700 text-white rounded";
@@ -63,10 +66,9 @@ function listenForInvites(currentUserId) {
     if (!data?.invites?.length) return;
 
     const invite = data.invites[0];
-    if (invite.from !== currentUserId) { 
+    if (invite.from !== currentUserId) {
       const accept = confirm(`Você recebeu um convite de duelo! Aceitar?`);
       if (accept) {
-        // Criar match e ativar
         const matchId = await startPvpMatch(currentUserId, invite.from);
         await activateMatch(matchId);
       }
@@ -80,7 +82,6 @@ let currentMatchId = null;
 export async function startPvpMatch(player1Id, player2Id) {
   const matchRef = doc(collection(db, "pvpMatches"));
 
-  // Carregar stats atuais para ambos jogadores do Firestore, para refletir estados reais (simplificação usa playerStats para ambos abaixo)
   const initialStats = {
     health: playerStats.health || 100,
     ki: playerStats.ki || 50,
@@ -109,7 +110,6 @@ function listenMatchStart(matchId, player1Id, player2Id) {
     if (!snapshot.exists()) return;
     const data = snapshot.data();
     if (data.status === 'active') {
-      // Redireciona ambos jogadores para a tela PvP
       if (auth.currentUser) {
         const currentUserId = auth.currentUser.uid;
         if (currentUserId === player1Id || currentUserId === player2Id) {
