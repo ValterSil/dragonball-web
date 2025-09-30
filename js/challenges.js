@@ -1,16 +1,13 @@
 import { auth, db } from './auth.js';
 import { doc, collection, getDocs, query, where, updateDoc, setDoc, arrayUnion, onSnapshot } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
-import { loadView } from './main.js';
-import { playerStats } from './main.js';
+import { loadView, playerStats } from './main.js';
+import { activateMatch } from './pvpCombat.js';
 
 export async function loadChallengesScreen() {
   const user = auth.currentUser;
-  if (!user) {
-    console.log('Usuário não autenticado ainda');
-    return;
-  }
-  const currentUserId = user.uid;
+  if (!user) return console.log('Usuário não autenticado');
 
+  const currentUserId = user.uid;
   const mainContent = document.getElementById('main-content-area');
   mainContent.innerHTML = `
     <h2 class="text-xl font-bold text-yellow-400 mb-4">Jogadores Online</h2>
@@ -38,13 +35,11 @@ export async function loadChallengesScreen() {
 
 async function invitePlayer(opponentId, opponentName) {
   const user = auth.currentUser;
-  if (!user) {
-    alert('Você precisa estar logado para convidar jogadores.');
-    return;
-  }
-  const currentUserId = user.uid;
+  if (!user) return alert('Você precisa estar logado para convidar jogadores.');
 
-  const inviteRef = doc(db, "pvpInvites", opponentId); 
+  const currentUserId = user.uid;
+  const inviteRef = doc(db, "pvpInvites", opponentId);
+
   try {
     await updateDoc(inviteRef, {
       invites: arrayUnion({ from: currentUserId, timestamp: new Date() })
@@ -59,13 +54,15 @@ function listenForInvites(currentUserId) {
   const inviteRef = doc(db, "pvpInvites", currentUserId);
   onSnapshot(inviteRef, async (snapshot) => {
     const data = snapshot.data();
-    if (!data || !data.invites || data.invites.length === 0) return;
+    if (!data?.invites?.length) return;
 
     const invite = data.invites[0];
     if (invite.from !== currentUserId) { 
       const accept = confirm(`Você recebeu um convite de duelo! Aceitar?`);
       if (accept) {
-        await startPvpMatch(currentUserId, invite.from);
+        // Iniciar a partida e ativar o match
+        const matchId = await startPvpMatch(currentUserId, invite.from);
+        await activateMatch(matchId);
       }
       await updateDoc(inviteRef, { invites: [] });
     }
@@ -74,7 +71,7 @@ function listenForInvites(currentUserId) {
 
 let currentMatchId = null;
 
-async function startPvpMatch(player1Id, player2Id) {
+export async function startPvpMatch(player1Id, player2Id) {
   const pvpMatchesCollection = collection(db, "pvpMatches");
   const matchRef = doc(pvpMatchesCollection);
 
@@ -90,32 +87,25 @@ async function startPvpMatch(player1Id, player2Id) {
     player1: { uid: player1Id, stats: initialStats, lastActionAt: new Date() },
     player2: { uid: player2Id, stats: initialStats, lastActionAt: new Date() },
     turn: player1Id,
-    status: "pending", // inicial como pendente
+    status: "pending",
     createdAt: new Date(),
     updatedAt: new Date()
   });
 
   currentMatchId = matchRef.id;
-
   listenMatchStart(currentMatchId);
+  return currentMatchId;
 }
 
 function listenMatchStart(matchId) {
   const matchDoc = doc(db, "pvpMatches", matchId);
   onSnapshot(matchDoc, (snapshot) => {
     if (!snapshot.exists()) return;
-
     const data = snapshot.data();
     if (data.status === 'active') {
       loadView('pvp-combat', { matchId });
     }
   });
-}
-
-// Chamado pelo jogador que aceitar o convite para ativar a partida
-export async function activateMatch(matchId) {
-  const matchDoc = doc(db, 'pvpMatches', matchId);
-  await updateDoc(matchDoc, { status: 'active', updatedAt: new Date() });
 }
 
 window.loadChallengesScreen = loadChallengesScreen;
