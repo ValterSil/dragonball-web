@@ -9,6 +9,10 @@ import { playerStats } from './main.js';
 export async function savePlayerToFirestore() {
     try {
         const user = auth.currentUser;
+            console.log("[DEBUG] Tentando salvar player...");
+            console.log("[DEBUG] Usuário logado:", user ? user.email : "Nenhum");
+            console.log("[DEBUG] Stats:", playerStats);
+        
         if (!user) throw new Error("Usuário não autenticado");
 
         const userDoc = doc(db, "users", user.uid);
