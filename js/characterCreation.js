@@ -1,6 +1,8 @@
 import { playerStats, logMessage, updateUI, saveLocalState, RACE_DATA, updateCalculatedStats, loadView } from './main.js';
 import { auth, db } from './auth.js';
 import { doc, setDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+import { savePlayerToFirestore } from './playerService.js';
+
 
 
 let selectedRace = null;
