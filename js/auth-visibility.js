@@ -1,8 +1,6 @@
 import { loadView, playerStats, updateUI } from './main.js';
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
-
-const auth = window.firebaseAuth;
-const db = window.firebaseDb;
+import { auth, db } from './auth.js'; // ✅ pega direto do auth.js
 
 const registerForm = document.getElementById('register-form');
 const loginForm = document.getElementById('login-form');
@@ -38,7 +36,7 @@ auth.onAuthStateChanged(async (user) => {
     }
   } else {
     showAuthForms();
-    await loadView('login'); // ou uma view específica de login se houver
+    await loadView('login'); // ou view específica
   }
 });
 
