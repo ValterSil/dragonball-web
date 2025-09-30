@@ -2,7 +2,8 @@
 
 // --- Configurações e Estado do Jogo ---
 
-//import { onMatchAccepted } from './pvpCombat.js';
+
+import { listenForActiveMatches } from './js/pvpCombat.js';
 
 export let playerStats = {
   name: null,
@@ -457,6 +458,7 @@ window.getTechById = getTechById;
 
 export async function initGame() {
   loadPlayerState();
+  listenForActiveMatches();
 }
 
 window.onload = initGame;
