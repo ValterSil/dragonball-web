@@ -1,7 +1,7 @@
 import { auth, db } from './auth.js';
 import { doc, getDoc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 import { playerStats, logMessage, loadView } from './main.js';
-
+/aff
 let currentMatch = null;
 let currentPlayerId = null;
 let opponentId = null;
@@ -40,8 +40,6 @@ export async function loadPvpCombatScreen(params) {
       loadView('combat-selection');
       return;
     }
-
-    renderTechniques(playerStats.techniques || []);
   });
 }
 
@@ -61,6 +59,26 @@ async function loadPlayersData(playerUid, opponentUid) {
   Object.assign(playerStats, playerData);
 
   updateCombatUI(playerData, opponentData);
+  
+  // Renderiza técnicas com base no array 'learnedTechniques'
+  renderTechniques(playerData.learnedTechniques || []);
+}
+
+function renderTechniques(techniques) {
+  const container = document.getElementById('techniques-list');
+  if (!container) {
+    logMessage("Container de técnicas não encontrado no DOM.", "text-red-500");
+    return;
+  }
+  container.innerHTML = ''; // limpa lista anterior
+
+  techniques.forEach(tech => {
+    const btn = document.createElement('button');
+    btn.className = 'bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-white';
+    btn.textContent = tech.name;
+    btn.onclick = () => playerAttack(tech);
+    container.appendChild(btn);
+  });
 }
 
 export function updateCombatUI(playerData, opponentData) {
