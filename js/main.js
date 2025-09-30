@@ -42,6 +42,8 @@ export let combatState = {
   currentEnemyMaxHealth: 0,
 };
 
+
+
 export const RACE_DATA = { 
     'Saiyajin': { emoji: '🐵', bonus: 'XP +5% / Poder +10% (Base)', xpBonus: 0.05, initialPower: 110, initialDefense: 15, techniques: [
         { id: 'saiyajin_kame', name: 'Kamehameha', description: 'Ataque de energia padrão (Dano Padrão).', minLevel: 1, cost: 10, type: 'Attack', powerMult: 1.2 },
@@ -132,6 +134,7 @@ export const ENEMY_DATA = {
 
 };
 
+
 const logElement = document.getElementById('game-log');
 const mainContentArea = document.getElementById('main-content-area');
 
@@ -145,25 +148,29 @@ export function logMessage(message, className = 'text-gray-300') {
   }
 }
 
+let currentView = null;
+
 export async function loadView(viewName, viewParams = {}) {
-  window.passedParams = viewParams;
   if (combatState.isActive && viewName !== 'arena') {
     logMessage(
-      'Você não pode sair do combate enquanto ele estiver ativo!',
+      'Você não pode sair enquanto estiver em combate!',
       'text-red-500'
     );
     return;
   }
-  console.log(`[main.js] Tentando carregar view: ${viewName}`);
+  if (currentView === viewName) {
+    return;  // evita recarga redundante
+  }
+  currentView = viewName;
+
   try {
     const response = await fetch(`views/${viewName}.html`);
-    if (!response.ok)
-      throw new Error(`Não foi possível carregar a view ${viewName}.html`);
+    if (!response.ok) throw new Error('Falha ao carregar view');
     const html = await response.text();
     mainContentArea.innerHTML = html;
     logMessage(`📺 Carregou tela: ${viewName}`, 'text-gray-500');
 
-    switch (viewName) {
+    switch(viewName) {
       case 'character-creation':
         const creationModule = await import('./characterCreation.js');
         creationModule.initCharacterCreationScreen();
@@ -204,8 +211,9 @@ export async function loadView(viewName, viewParams = {}) {
           logMessage('❌ Erro ao carregar a tela PvP Combat', 'text-red-500');
         }
         break;
+      // demais cases...
     }
-  } catch (error) {
+  } catch(error) {
     console.error(error);
     logMessage(`❌ Erro ao carregar a tela '${viewName}'`, 'text-red-500');
     mainContentArea.innerHTML = `<p class="text-red-500 text-center mt-8">Erro ao carregar a tela. Verifique o console para detalhes.</p>`;
@@ -229,8 +237,8 @@ export function loadPlayerState() {
         baseMaxHealth: parsedData.baseMaxHealth || playerStats.baseMaxHealth,
         baseMaxKi: parsedData.baseMaxKi || playerStats.baseMaxKi,
       };
-    } catch (e) {
-      console.error('Erro ao analisar JSON do localStorage:', e);
+    } catch (err) {
+      console.error('Erro ao analisar JSON do localStorage:', err);
       localStorage.removeItem('rpgPlayerStats');
     }
   }
@@ -262,12 +270,9 @@ export function saveLocalState() {
       baseMaxKi: playerStats.baseMaxKi,
     };
     localStorage.setItem('rpgPlayerStats', JSON.stringify(stateToSave));
-  } catch (e) {
-    console.error('Erro ao salvar no localStorage:', e);
-    logMessage(
-      '❌ Erro ao salvar o progresso localmente. O navegador pode estar cheio.',
-      'text-red-500'
-    );
+  } catch (err) {
+    console.error('Erro ao salvar no localStorage:', err);
+    logMessage('❌ Erro ao salvar o progresso localmente. O navegador pode estar cheio.', 'text-red-500');
   }
 }
 
@@ -332,10 +337,7 @@ export function updateUI() {
 
   const leftPlayerHpVal = document.getElementById('left-player-hp-val');
   if (leftPlayerHpVal)
-    leftPlayerHpVal.textContent = `${Math.max(
-      0,
-      Math.floor(playerStats.health)
-    )}/${Math.floor(playerStats.maxHealth)}`;
+    leftPlayerHpVal.textContent = `${Math.max(0, Math.floor(playerStats.health))}/${Math.floor(playerStats.maxHealth)}`;
 
   const leftPlayerHpBar = document.getElementById('left-player-hp-bar');
   if (leftPlayerHpBar) {
@@ -345,10 +347,7 @@ export function updateUI() {
 
   const leftPlayerKiVal = document.getElementById('left-player-ki-val');
   if (leftPlayerKiVal)
-    leftPlayerKiVal.textContent = `${Math.max(
-      0,
-      Math.floor(playerStats.ki)
-    )}/${Math.floor(playerStats.maxKi)}`;
+    leftPlayerKiVal.textContent = `${Math.max(0, Math.floor(playerStats.ki))}/${Math.floor(playerStats.maxKi)}`;
 
   const leftPlayerKiBar = document.getElementById('left-player-ki-bar');
   if (leftPlayerKiBar) {
@@ -363,70 +362,11 @@ export function updateUI() {
   if (leftPlayerZeniVal) leftPlayerZeniVal.textContent = playerStats.coins;
 
   const leftPlayerAttrPointsVal = document.getElementById('left-player-attr-points-val');
-  if (leftPlayerAttrPointsVal) leftPlayerAttrPointsVal.textContent =
-    playerStats.attributePoints;
+  if (leftPlayerAttrPointsVal) leftPlayerAttrPointsVal.textContent = playerStats.attributePoints;
 
-  if (document.getElementById('stats-name-display')) {
-    document.getElementById('stats-name-display').textContent =
-      playerStats.name || '---';
-    document.getElementById('stats-race-display').textContent =
-      playerStats.race || '---';
-    document.getElementById('stats-level-display').textContent = playerStats.level;
-    document.getElementById('stats-xp-display').textContent = `${playerStats.xp} / ${XP_TO_LEVEL}`;
-    document.getElementById('stats-power-display').textContent = playerStats.power;
-    document.getElementById('stats-defense-display').textContent = playerStats.defense;
-
-    const healthPercent = (playerStats.health / playerStats.maxHealth) * 100;
-    document.getElementById('stats-health-display').textContent = `${Math.max(
-      0,
-      Math.floor(playerStats.health)
-    )}/${Math.floor(playerStats.maxHealth)}`;
-    document.getElementById('stats-health-bar').style.width = `${Math.max(
-      0,
-      healthPercent
-    )}%`;
-
-    const kiPercent = (playerStats.ki / playerStats.maxKi) * 100;
-    document.getElementById('stats-ki-display').textContent = `${Math.max(
-      0,
-      Math.floor(playerStats.ki)
-    )}/${Math.floor(playerStats.maxKi)}`;
-    document.getElementById('stats-ki-bar').style.width = `${Math.max(
-      0,
-      kiPercent
-    )}%`;
-
-    document.getElementById('stats-coins-display').textContent = playerStats.coins;
-    document.getElementById('stats-attribute-points-display').textContent =
-      playerStats.attributePoints;
-    const xpBonusPercentage = Math.round((playerStats.xpMultiplier - 1.0) * 100);
-    document.getElementById('stats-xp-multiplier-display').textContent = `+${xpBonusPercentage}%`;
-
-    const attrList = document.getElementById('base-attributes-list');
-    if (attrList) {
-      attrList.innerHTML = `
-                <li>Força (STR): ${playerStats.attributes.strength}</li>
-                <li>Vigor (VIT): ${playerStats.attributes.vitality}</li>
-                <li>Controle de Ki (KI): ${playerStats.attributes.ki_control}</li>
-            `;
-    }
-
-    const learnedList = document.getElementById('learned-techniques-list');
-    if (learnedList) {
-      learnedList.innerHTML = '';
-      if (playerStats.learnedTechniques.length > 0) {
-        playerStats.learnedTechniques.forEach((techId) => {
-          const tech = getTechById(techId);
-          const li = document.createElement('li');
-          li.textContent = `• ${tech ? tech.name : techId}`;
-          learnedList.appendChild(li);
-        });
-      } else {
-        learnedList.innerHTML = '<li class="italic text-gray-500">Nenhuma</li>';
-      }
-    }
-  }
+  // Atualize outros campos e listas que estiver usando, se existente
 }
+
 
 export function disableActions(disabled) {
   document.querySelectorAll('.action-btn, #create-character-button, .menu-link').forEach(
