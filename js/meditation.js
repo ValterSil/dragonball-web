@@ -11,7 +11,7 @@ import {
     combatState 
 } from './main.js';
 
-import { savePlayerToFirestore } from './playerService.js'; // 🔥 Novo import
+import { savePlayerToFirestore } from './playerService.js'; // 🔥 asdasdNovo import
 
 /**
  * Inicializa a tela de Meditação.
