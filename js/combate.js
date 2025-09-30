@@ -1,6 +1,7 @@
 // combate.js
 import { CombatSystem } from './combatSystem.js';
 import { playerStats, logMessage, updateUI, saveLocalState, combatState, ENEMY_DATA, XP_TO_LEVEL, POINTS_PER_LEVEL, updateCalculatedStats, getTechById, loadView } from './main.js';
+import { savePlayerToFirestore } from './playerService.js'; // 🔥 asdasdNovo import
 
 // Elemento do log de movimentos de combate (será inicializado uma vez)
 let combatMovesLogElement = null;
@@ -350,6 +351,8 @@ export async function endCombat(reason, enemy = null) {
     updateCalculatedStats(); 
 
     saveLocalState();
+
+    await savePlayerToFirestore(); // 🔥 Agora salva no Firestore também
 
     // Não limpa o combate ainda para mostrar resultado
     // A limpeza será feita após a pausa
