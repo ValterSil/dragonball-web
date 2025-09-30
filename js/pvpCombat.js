@@ -1,11 +1,11 @@
 import { auth, db } from './auth.js';
-import { doc, getDoc, onSnapshot, updateDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+import { doc, getDoc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 import { playerStats, logMessage, loadView } from './main.js';
 
 let currentMatch = null;
 let currentPlayerId = null;
 let opponentId = null;
-//luis
+
 // Carrega e inicializa a tela PvP com os dados da partida
 export async function loadPvpCombatScreen(params) {
   if (!params?.matchId) {
@@ -66,34 +66,50 @@ async function loadPlayersData(playerUid, opponentUid) {
 
 // Atualiza as barras, nomes e imagens da UI
 export function updateCombatUI(playerData, opponentData) {
+  function safeSetText(id, text){
+    const elem = document.getElementById(id);
+    if(elem) elem.textContent = text;
+  }
+  function safeSetWidth(id, width){
+    const elem = document.getElementById(id);
+    if(elem) elem.style.width = width;
+  }
+  function safeSetSrc(id, src){
+    const elem = document.getElementById(id);
+    if(elem) elem.src = src;
+  }
+
   // jogador
-  document.getElementById('player-combat-name').textContent = playerData.characterName || "Você";
-  document.getElementById('player-combat-level').textContent = `Nível ${playerData.level || 1}`;
-  document.getElementById('player-combat-hp-val').textContent = `${playerData.health || 0}/${playerData.maxHealth || 100}`;
-  document.getElementById('player-combat-ki-val').textContent = `${playerData.ki || 0}/${playerData.maxKi || 100}`;
+  safeSetText('player-combat-name', playerData.characterName || "Você");
+  safeSetText('player-combat-level', `Nível ${playerData.level || 1}`);
 
-  const playerHpPercent = ((playerData.health || 0) / (playerData.maxHealth || 100)) * 100;
-  const playerKiPercent = ((playerData.ki || 0) / (playerData.maxKi || 100)) * 100;
+  const playerMaxHealth = playerData.maxHealth || 100;
+  const playerHealth = playerData.health || 0;
+  safeSetText('player-combat-hp-val', `${playerHealth}/${playerMaxHealth}`);
+  safeSetWidth('player-combat-hp-bar', `${(playerHealth / playerMaxHealth) * 100}%`);
 
-  document.getElementById('player-combat-hp-bar').style.width = `${playerHpPercent}%`;
-  document.getElementById('player-combat-ki-bar').style.width = `${playerKiPercent}%`;
+  const playerMaxKi = playerData.maxKi || 100;
+  const playerKi = playerData.ki || 0;
+  safeSetText('player-combat-ki-val', `${playerKi}/${playerMaxKi}`);
+  safeSetWidth('player-combat-ki-bar', `${(playerKi / playerMaxKi) * 100}%`);
 
-  // Se tiver imagem armazenada no playerData, use, senão, usar padrão
-  document.getElementById('player-combat-img').src = playerData.avatarUrl || 'imagens/player/goku-player.png';
+  safeSetSrc('player-combat-img', playerData.avatarUrl || 'imagens/player/goku-player.png');
 
   // oponente
-  document.getElementById('enemy-combat-name').textContent = opponentData.characterName || "Oponente";
-  document.getElementById('enemy-combat-level').textContent = `Nível ${opponentData.level || 1}`;
-  document.getElementById('enemy-combat-hp-val').textContent = `${opponentData.health || 0}/${opponentData.maxHealth || 100}`;
-  document.getElementById('enemy-combat-ki-val').textContent = `${opponentData.ki || 0}/${opponentData.maxKi || 100}`;
+  safeSetText('enemy-combat-name', opponentData.characterName || "Oponente");
+  safeSetText('enemy-combat-level', `Nível ${opponentData.level || 1}`);
 
-  const enemyHpPercent = ((opponentData.health || 0) / (opponentData.maxHealth || 100)) * 100;
-  const enemyKiPercent = ((opponentData.ki || 0) / (opponentData.maxKi || 100)) * 100;
+  const opponentMaxHealth = opponentData.maxHealth || 100;
+  const opponentHealth = opponentData.health || 0;
+  safeSetText('enemy-combat-hp-val', `${opponentHealth}/${opponentMaxHealth}`);
+  safeSetWidth('enemy-combat-hp-bar', `${(opponentHealth / opponentMaxHealth) * 100}%`);
 
-  document.getElementById('enemy-combat-hp-bar').style.width = `${enemyHpPercent}%`;
-  document.getElementById('enemy-combat-ki-bar').style.width = `${enemyKiPercent}%`;
+  const opponentMaxKi = opponentData.maxKi || 100;
+  const opponentKi = opponentData.ki || 0;
+  safeSetText('enemy-combat-ki-val', `${opponentKi}/${opponentMaxKi}`);
+  safeSetWidth('enemy-combat-ki-bar', `${(opponentKi / opponentMaxKi) * 100}%`);
 
-  document.getElementById('enemy-combat-img').src = opponentData.avatarUrl || 'https://via.placeholder.com/64';
+  safeSetSrc('enemy-combat-img', opponentData.avatarUrl || 'imagens/player/placeholder.png');
 }
 
 // Funcionalidade para atacar
@@ -108,21 +124,18 @@ export async function playerAttack(technique) {
   }
 
   const matchRef = doc(db, "pvpMatches", currentMatch.id);
-
   const isPlayer1 = currentMatch.player1.uid === currentPlayerId;
 
-  // Simplificação de cálculo de dano - atualizar conforme regras do seu sistema
+  // Simplificado: calcula dano simples
   const damage = technique.power || 5;
-
-  const newHealthPath = isPlayer1 ? "player2.stats.health" : "player1.stats.health";
+  const opponentHealthPath = isPlayer1 ? "player2.stats.health" : "player1.stats.health";
 
   const opponentStats = isPlayer1 ? currentMatch.player2.stats : currentMatch.player1.stats;
-
   const newHealth = Math.max(0, (opponentStats.health || 100) - damage);
 
   try {
     await updateDoc(matchRef, {
-      [newHealthPath]: newHealth,
+      [opponentHealthPath]: newHealth,
       turn: isPlayer1 ? currentMatch.player2.uid : currentMatch.player1.uid,
       updatedAt: new Date()
     });
@@ -132,24 +145,26 @@ export async function playerAttack(technique) {
   }
 }
 
-// Redireciona ambos jogadores ao ativar a partida PvP
+// Ativa a partida e redireciona ambos jogadores para a tela PvP
 export async function activateMatch(matchIdToActivate) {
   const matchRef = doc(db, "pvpMatches", matchIdToActivate);
   try {
     await updateDoc(matchRef, { status: "active", updatedAt: new Date() });
     logMessage('[PvP] Partida ativada!');
 
-    // Atualiza paths dos jogadores
     const matchDataSnapshot = await getDoc(matchRef);
     if (matchDataSnapshot.exists()) {
       const data = matchDataSnapshot.data();
-      // Redireciona para ambos jogadores abrir a tela PvP
       if (auth.currentUser) {
         const uid = auth.currentUser.uid;
         if (uid === data.player1.uid || uid === data.player2.uid) {
           window.passedParams = { matchId: matchIdToActivate };
-          loadPvpCombatScreen({ matchId: matchIdToActivate });
-          document.getElementById('pvp-combat-screen').classList.remove('hidden');
+          loadView('pvp-combat');
+          document.addEventListener('DOMContentLoaded', () => {
+            const screen = document.getElementById('pvp-combat-screen');
+            if (screen) screen.classList.remove('hidden');
+            loadPvpCombatScreen(window.passedParams);
+          });
         }
       }
     }
