@@ -1,6 +1,6 @@
 // atributos.js
 import { playerStats, logMessage, updateUI, saveLocalState, updateCalculatedStats, loadView } from './main.js';
-
+import { savePlayerToFirestore } from './playerService.js'; // 🔥 asdasdNovo import
 /**
  * Mostra a tela de gerenciamento de atributos.
  * Esta função é chamada quando a view 'atributos' é carregada.
@@ -87,6 +87,7 @@ export async function increaseAttribute(key) {
     logMessage(`Você investiu 1 ponto em ${key.toUpperCase()}. Novo valor: ${playerStats.attributes[key]}`, 'text-indigo-400');
     
     saveLocalState(); // Salva o estado atualizado
+    await savePlayerToFirestore(); // 🔥 Agora salva no Firestore também
     
     renderAttributeManager(); // Re-renderiza a lista de atributos
     updateUI(); // Atualiza a UI geral do jogo
