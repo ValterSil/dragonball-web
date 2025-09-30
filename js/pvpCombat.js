@@ -11,40 +11,57 @@ let currentPlayerId = null;
 let opponentId = null;
 let matchData = null;
 
+// Função que atualiza automaticamente a interface
 export function updateCombatUI(opponentStats) {
     if (!opponentStats) return;
 
     // Player
-    const playerHealthEl = document.getElementById('player-health');
-    const playerKiEl = document.getElementById('player-ki');
-    const playerPowerEl = document.getElementById('player-power');
+    const playerHealthBar = document.getElementById('player-health-bar');
+    const playerHealthVal = document.getElementById('player-health-val');
+    const playerKiBar = document.getElementById('player-ki-bar');
+    const playerKiVal = document.getElementById('player-ki-val');
+    const playerPowerVal = document.getElementById('player-power-val');
 
-    if (playerHealthEl) playerHealthEl.textContent = playerStats.health;
-    if (playerKiEl) playerKiEl.textContent = playerStats.ki;
-    if (playerPowerEl) playerPowerEl.textContent = playerStats.power;
+    if (playerHealthBar && playerHealthVal && playerKiBar && playerKiVal && playerPowerVal) {
+        playerHealthVal.textContent = playerStats.health;
+        playerKiVal.textContent = playerStats.ki;
+        playerPowerVal.textContent = playerStats.power;
+
+        playerHealthBar.style.width = `${Math.max(0, (playerStats.health / playerStats.maxHealth) * 100)}%`;
+        playerKiBar.style.width = `${Math.max(0, (playerStats.ki / playerStats.maxKi) * 100)}%`;
+    }
 
     // Opponent
-    const opponentHealthEl = document.getElementById('opponent-health');
-    const opponentKiEl = document.getElementById('opponent-ki');
-    const opponentPowerEl = document.getElementById('opponent-power');
+    const opponentHealthBar = document.getElementById('opponent-health-bar');
+    const opponentHealthVal = document.getElementById('opponent-health-val');
+    const opponentKiBar = document.getElementById('opponent-ki-bar');
+    const opponentKiVal = document.getElementById('opponent-ki-val');
+    const opponentPowerVal = document.getElementById('opponent-power-val');
 
-    if (opponentHealthEl) opponentHealthEl.textContent = opponentStats.health;
-    if (opponentKiEl) opponentKiEl.textContent = opponentStats.ki;
-    if (opponentPowerEl) opponentPowerEl.textContent = opponentStats.power;
+    if (opponentHealthBar && opponentHealthVal && opponentKiBar && opponentKiVal && opponentPowerVal) {
+        opponentHealthVal.textContent = opponentStats.health;
+        opponentKiVal.textContent = opponentStats.ki;
+        opponentPowerVal.textContent = opponentStats.power;
 
-    // Log
-    const logElement = document.getElementById('combat-log');
-    if (logElement) {
-        const div = document.createElement('div');
-        div.className = 'log-message text-gray-300';
-        div.textContent = `📣 Status do inimigo atualizado!`;
-        logElement.prepend(div);
+        opponentHealthBar.style.width = `${Math.max(0, (opponentStats.health / opponentStats.maxHealth) * 100)}%`;
+        opponentKiBar.style.width = `${Math.max(0, (opponentStats.ki / opponentStats.maxKi) * 100)}%`;
     }
 }
 
+// Função para adicionar mensagens no log automaticamente
+export function logMessage(message) {
+    const logDiv = document.getElementById('combat-log');
+    if (!logDiv) return;
+    const p = document.createElement('p');
+    p.textContent = message;
+    logDiv.appendChild(p);
+    logDiv.scrollTop = logDiv.scrollHeight;
+}
 
-
+// Carrega a tela PvP e sincroniza com o Firestore
 export function loadPvpCombatScreen(params) {
+    if (!params.matchId) return;
+
     matchId = params.matchId;
     currentPlayerId = auth.currentUser.uid;
     matchRef = doc(db, "pvpMatches", matchId);
@@ -58,12 +75,10 @@ export function loadPvpCombatScreen(params) {
         const localPlayerStats = matchData.player1.uid === currentPlayerId ? matchData.player1.stats : matchData.player2.stats;
         const opponentStats = matchData.player1.uid === currentPlayerId ? matchData.player2.stats : matchData.player1.stats;
 
-        playerStats.health = localPlayerStats.health;
-        playerStats.ki = localPlayerStats.ki;
-        playerStats.power = localPlayerStats.power;
-        playerStats.defense = localPlayerStats.defense;
-        playerStats.upgrades = { ...localPlayerStats.upgrades };
+        // Atualiza stats do player local
+        Object.assign(playerStats, localPlayerStats);
 
+        // Atualiza a interface automaticamente
         updateCombatUI(opponentStats);
 
         if (matchData.status === "finished") {
@@ -72,15 +87,16 @@ export function loadPvpCombatScreen(params) {
     });
 }
 
+// Função de ataque
 export async function playerAttack(selectedTechnique) {
     if (!matchData || matchData.turn !== currentPlayerId) return;
 
     const opponentStats = matchData.player1.uid === currentPlayerId ? matchData.player2.stats : matchData.player1.stats;
 
-    const damage = (selectedTechnique.power || 10) - (opponentStats.defense || 0);
-    opponentStats.health -= Math.max(damage, 0);
+    const damage = Math.max((selectedTechnique.power || 10) - (opponentStats.defense || 0), 0);
+    opponentStats.health -= damage;
 
-    updateCombatUI(opponentStats);
+    logMessage(`Você usou ${selectedTechnique.name} e causou ${damage} de dano!`);
 
     const newTurn = opponentId;
 
@@ -90,11 +106,6 @@ export async function playerAttack(selectedTechnique) {
 
     await updateDoc(matchRef, update);
 
-    const logElement = document.getElementById('game-log');
-    if (logElement) {
-        const div = document.createElement('div');
-        div.className = 'log-message text-gray-300';
-        div.textContent = `Você usou ${selectedTechnique.name} e causou ${Math.max(damage, 0)} de dano!`;
-        logElement.prepend(div);
-    }
+    // Atualiza a interface após ataque
+    updateCombatUI(opponentStats);
 }
