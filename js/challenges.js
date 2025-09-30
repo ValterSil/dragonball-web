@@ -1,21 +1,17 @@
 // challenges.js
 import { auth, db } from './auth.js';
-import { doc, collection, getDocs, query, where, updateDoc, onSnapshot, arrayUnion, setDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+import { doc, collection, getDocs, query, where, updateDoc, setDoc, arrayUnion, onSnapshot } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 import { loadView } from './main.js';
 import { playerStats } from './main.js';
 
-const currentUserId = () => auth.currentUser.uid;
+const currentUserId = auth.currentUser.uid;
 
-// Marca jogador como online ao carregar a tela
 export async function loadChallengesScreen() {
     const mainContent = document.getElementById('main-content-area');
-    mainContent.innerHTML = '<h2 class="text-xl font-bold text-yellow-400 mb-4">Jogadores Online</h2><div id="players-list"></div>';
-
-    // Marca o jogador logado como online
-    const currentUserRef = doc(db, "users", currentUserId());
-    await updateDoc(currentUserRef, { online: true }).catch(() => {
-        console.warn("Erro ao marcar online");
-    });
+    mainContent.innerHTML = `
+        <h2 class="text-xl font-bold text-yellow-400 mb-4">Jogadores Online</h2>
+        <div id="players-list"></div>
+    `;
 
     const usersRef = collection(db, "users");
     const q = query(usersRef, where("online", "==", true));
@@ -24,11 +20,11 @@ export async function loadChallengesScreen() {
     const listDiv = document.getElementById('players-list');
     snapshot.forEach(docSnap => {
         const player = docSnap.data();
-        if (docSnap.id !== currentUserId()) { // ignora você mesmo
+        if (docSnap.id !== currentUserId) { // ignora você mesmo
             const btn = document.createElement('button');
-            btn.textContent = player.characterName;
+            btn.textContent = player.characterName || "Jogador";
             btn.className = "block w-full mb-2 p-2 bg-blue-600 hover:bg-blue-700 text-white rounded";
-            btn.onclick = () => invitePlayer(docSnap.id, player.characterName);
+            btn.onclick = () => invitePlayer(docSnap.id, player.characterName || "Jogador");
             listDiv.appendChild(btn);
         }
     });
@@ -36,29 +32,30 @@ export async function loadChallengesScreen() {
     listenForInvites();
 }
 
-// Envia convite para outro jogador
 async function invitePlayer(opponentId, opponentName) {
-    const inviteRef = doc(db, "pvpInvites", opponentId);
-    await updateDoc(inviteRef, {
-        invites: arrayUnion({ from: currentUserId(), timestamp: new Date() })
-    }).catch(async () => {
-        await setDoc(inviteRef, { invites: [{ from: currentUserId(), timestamp: new Date() }] });
-    });
+    const inviteRef = doc(db, "pvpInvites", opponentId); 
+    try {
+        await updateDoc(inviteRef, {
+            invites: arrayUnion({ from: currentUserId, timestamp: new Date() })
+        });
+    } catch (err) {
+        // cria doc se não existir
+        await setDoc(inviteRef, { invites: [{ from: currentUserId, timestamp: new Date() }] });
+    }
     alert(`Convite enviado para ${opponentName}`);
 }
 
-// Escuta convites recebidos
 function listenForInvites() {
-    const inviteRef = doc(db, "pvpInvites", currentUserId());
+    const inviteRef = doc(db, "pvpInvites", currentUserId);
     onSnapshot(inviteRef, async (snapshot) => {
         const data = snapshot.data();
         if (!data || !data.invites || data.invites.length === 0) return;
 
         const invite = data.invites[0];
-        if (invite.from !== currentUserId()) {
+        if (invite.from !== currentUserId) { 
             const accept = confirm(`Você recebeu um convite de duelo! Aceitar?`);
             if (accept) {
-                await startPvpMatch(currentUserId(), invite.from);
+                await startPvpMatch(currentUserId, invite.from);
             }
             // remove o convite aceito/rejeitado
             await updateDoc(inviteRef, { invites: [] });
@@ -66,21 +63,16 @@ function listenForInvites() {
     });
 }
 
-// Cria a partida PvP
 async function startPvpMatch(player1Id, player2Id) {
-    // Cria doc da partida com stats iniciais do jogador
     const matchRef = doc(collection(db, "pvpMatches"));
+
+    // Cria partida no Firestore com stats iniciais
     const initialStats = {
-        health: playerStats.health,
-        ki: playerStats.ki,
-        power: playerStats.power,
-        defense: playerStats.defense,
-        level: playerStats.level,
-        zeni: playerStats.coins,
-        attributes: { ...playerStats.attributes },
-        attributePoints: playerStats.attributePoints,
-        upgrades: [...playerStats.upgrades],
-        learnedTechniques: [...playerStats.learnedTechniques]
+        health: playerStats.health || 100,
+        ki: playerStats.ki || 50,
+        power: playerStats.power || 10,
+        defense: playerStats.defense || 5,
+        upgrades: { ...playerStats.upgrades } // copia upgrades como objeto
     };
 
     await setDoc(matchRef, {
@@ -92,8 +84,8 @@ async function startPvpMatch(player1Id, player2Id) {
         updatedAt: new Date()
     });
 
-    // Carrega a tela de combate PvP
-    window.loadView('pvp-combat', { matchId: matchRef.id });
+    // Carrega a tela PvP para ambos os jogadores
+    await loadView('pvp-combat', { matchId: matchRef.id });
 }
 
 window.loadChallengesScreen = loadChallengesScreen;
