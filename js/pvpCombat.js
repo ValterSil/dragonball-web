@@ -1,9 +1,29 @@
 import { auth, db } from './auth.js';
-import { doc, getDoc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
-import { playerStats, logMessage, loadView } from './main.js';
+import { doc, getDoc, onSnapshot, updateDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+import { playerStats, logMessage, loadView, getTechById } from './main.js';
+
 let currentMatch = null;
 let currentPlayerId = null;
 let opponentId = null;
+
+export function listenForActiveMatches() {
+  // Ouve todas as partidas que envolvam o jogador logado e que estejam ativas
+  auth.onAuthStateChanged(user => {
+    if (!user) return;
+    const userId = user.uid;
+    const matchesRef = collection(db, 'pvpMatches');
+    const q = query(matchesRef, where('status', '==', 'active')); // Você pode otimizar para partidas que envolvam o player
+    onSnapshot(q, snapshot => {
+      snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        if (data.player1.uid === userId || data.player2.uid === userId) {
+          // Se corresponde a este jogador
+          loadView('pvp-combat', { matchId: docSnap.id });
+        }
+      });
+    });
+  });
+}
 
 export async function loadPvpCombatScreen(params) {
   if (!params?.matchId) {
@@ -25,7 +45,6 @@ export async function loadPvpCombatScreen(params) {
       loadView('combat-selection');
       return;
     }
-
     currentMatch = snapshot.data();
 
     if (currentMatch.player1.uid === currentPlayerId) {
@@ -59,7 +78,6 @@ async function loadPlayersData(playerUid, opponentUid) {
 
   updateCombatUI(playerData, opponentData);
   
-  // Renderiza técnicas com base no array 'learnedTechniques'
   renderTechniques(playerData.learnedTechniques || []);
 }
 
@@ -69,9 +87,10 @@ function renderTechniques(techniques) {
     logMessage("Container de técnicas não encontrado no DOM.", "text-red-500");
     return;
   }
-  container.innerHTML = ''; // limpa lista anterior
-
-  techniques.forEach(tech => {
+  container.innerHTML = '';
+  techniques.forEach(techId => {
+    const tech = getTechById(techId);
+    if (!tech) return;
     const btn = document.createElement('button');
     btn.className = 'bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-white';
     btn.textContent = tech.name;
@@ -81,29 +100,20 @@ function renderTechniques(techniques) {
 }
 
 export function updateCombatUI(playerData, opponentData) {
-  function safeSetText(id, text) {
-    const elem = document.getElementById(id);
-    if (elem) elem.textContent = text;
-  }
-  function safeSetWidth(id, width) {
-    const elem = document.getElementById(id);
-    if (elem) elem.style.width = width;
-  }
-  function safeSetSrc(id, src) {
-    const elem = document.getElementById(id);
-    if (elem) elem.src = src;
-  }
+  const safeSetText = (id, text) => { const el = document.getElementById(id); if(el) el.textContent = text; };
+  const safeSetWidth = (id, width) => { const el = document.getElementById(id); if(el) el.style.width = width; };
+  const safeSetSrc = (id, src) => { const el = document.getElementById(id); if(el) el.src = src; };
 
   safeSetText('player-combat-name', playerData.characterName || "Você");
   safeSetText('player-combat-level', `Nível ${playerData.level || 1}`);
 
-  const playerMaxHealth = playerData.maxHealth || 100;
-  const playerHealth = playerData.health || 0;
+  let playerMaxHealth = playerData.maxHealth || 100;
+  let playerHealth = playerData.health || 0;
   safeSetText('player-combat-hp-val', `${playerHealth}/${playerMaxHealth}`);
   safeSetWidth('player-combat-hp-bar', `${(playerHealth / playerMaxHealth) * 100}%`);
 
-  const playerMaxKi = playerData.maxKi || 100;
-  const playerKi = playerData.ki || 0;
+  let playerMaxKi = playerData.maxKi || 100;
+  let playerKi = playerData.ki || 0;
   safeSetText('player-combat-ki-val', `${playerKi}/${playerMaxKi}`);
   safeSetWidth('player-combat-ki-bar', `${(playerKi / playerMaxKi) * 100}%`);
 
@@ -112,13 +122,13 @@ export function updateCombatUI(playerData, opponentData) {
   safeSetText('enemy-combat-name', opponentData.characterName || "Oponente");
   safeSetText('enemy-combat-level', `Nível ${opponentData.level || 1}`);
 
-  const opponentMaxHealth = opponentData.maxHealth || 100;
-  const opponentHealth = opponentData.health || 0;
+  let opponentMaxHealth = opponentData.maxHealth || 100;
+  let opponentHealth = opponentData.health || 0;
   safeSetText('enemy-combat-hp-val', `${opponentHealth}/${opponentMaxHealth}`);
   safeSetWidth('enemy-combat-hp-bar', `${(opponentHealth / opponentMaxHealth) * 100}%`);
 
-  const opponentMaxKi = opponentData.maxKi || 100;
-  const opponentKi = opponentData.ki || 0;
+  let opponentMaxKi = opponentData.maxKi || 100;
+  let opponentKi = opponentData.ki || 0;
   safeSetText('enemy-combat-ki-val', `${opponentKi}/${opponentMaxKi}`);
   safeSetWidth('enemy-combat-ki-bar', `${(opponentKi / opponentMaxKi) * 100}%`);
 
