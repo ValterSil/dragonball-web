@@ -96,27 +96,15 @@ async function createCharacter(name, race) {
     playerStats.health = playerStats.maxHealth;
     playerStats.ki = playerStats.maxKi;
 
-// Salva dados no Firestore
+// Salva dados no Firestore usando a função centralizada
 try {
-    const user = auth.currentUser;
-    if (!user) throw new Error('Usuário não autenticado');
-    const userDoc = doc(db, 'users', user.uid); // sobrescreve o perfil de cadastro
-    await setDoc(userDoc, {
-        email: user.email,
-        createdAt: new Date(),  // ou mantém o original se quiser
-        characterName: playerStats.name,
-        level: playerStats.level,
-        power: playerStats.power,
-        zeni: playerStats.coins,
-        attributes: playerStats.attributes,
-        learnedTechniques: playerStats.learnedTechniques,
-        upgrades: playerStats.upgrades
-    });
+    await savePlayerToFirestore();
     logMessage('Personagem salvo na conta do usuário!', 'text-green-400 font-bold');
 } catch (error) {
     console.error('Erro ao salvar personagem no Firestore:', error);
     logMessage('Erro ao salvar personagem na conta.', 'text-red-500');
 }
+
 
 
     saveLocalState();
