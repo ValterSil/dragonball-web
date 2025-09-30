@@ -32,9 +32,8 @@
 </div>
 
 <script type="module">
-    import { playerStats, updateCombatUI, logMessage, playerAttack } from './main.js';
+    import { playerStats, updateCombatUI, logMessage, playerAttack, loadPvpCombatScreen } from './pvpCombat.js';
 
-    // Inicializa a tela com stats do jogador
     const playerHealthEl = document.getElementById('player-health');
     const playerKiEl = document.getElementById('player-ki');
     const playerPowerEl = document.getElementById('player-power');
@@ -53,7 +52,6 @@
         opponentPowerEl.textContent = opponentStats.power;
     }
 
-    // Sobrescreve updateCombatUI para atualizar esta tela
     window.updateCombatUI = function(opponentStats) {
         refreshStats(opponentStats);
 
@@ -72,6 +70,12 @@
     window.playerAttack = async function(technique) {
         if (!technique) return;
         logMessage(`Você usou ${technique.name}!`);
-        await import('./pvpCombat.js').then(mod => mod.playerAttack(technique));
+        await playerAttack(technique);
     };
+
+    // Inicializa a tela PvP após carregar view
+    const params = window.passedParams || {};
+    if (params.matchId) {
+        loadPvpCombatScreen(params);
+    }
 </script>
