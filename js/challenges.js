@@ -1,9 +1,10 @@
 // challenges.js
-import { auth, db } from './auth.js';
+import { auth } from './auth.js'; 
 import { doc, collection, getDocs, query, where, updateDoc, setDoc, arrayUnion, onSnapshot } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 import { loadView } from './main.js';
 import { playerStats } from './main.js';
 
+const db = window.firebaseDb;
 const currentUserId = auth.currentUser.uid;
 
 export async function loadChallengesScreen() {
@@ -39,7 +40,6 @@ async function invitePlayer(opponentId, opponentName) {
             invites: arrayUnion({ from: currentUserId, timestamp: new Date() })
         });
     } catch (err) {
-        // cria doc se não existir
         await setDoc(inviteRef, { invites: [{ from: currentUserId, timestamp: new Date() }] });
     }
     alert(`Convite enviado para ${opponentName}`);
@@ -57,22 +57,23 @@ function listenForInvites() {
             if (accept) {
                 await startPvpMatch(currentUserId, invite.from);
             }
-            // remove o convite aceito/rejeitado
             await updateDoc(inviteRef, { invites: [] });
         }
     });
 }
 
+// Atualizado para criar o documento e guardar o ID
+let currentMatchId = null;
+
 async function startPvpMatch(player1Id, player2Id) {
     const matchRef = doc(collection(db, "pvpMatches"));
 
-    // Cria partida no Firestore com stats iniciais
     const initialStats = {
         health: playerStats.health || 100,
         ki: playerStats.ki || 50,
         power: playerStats.power || 10,
         defense: playerStats.defense || 5,
-        upgrades: { ...playerStats.upgrades } // copia upgrades como objeto
+        upgrades: { ...playerStats.upgrades }
     };
 
     await setDoc(matchRef, {
@@ -84,8 +85,12 @@ async function startPvpMatch(player1Id, player2Id) {
         updatedAt: new Date()
     });
 
-    // Carrega a tela PvP para ambos os jogadores
-    await loadView('pvp-combat', { matchId: matchRef.id });
+    currentMatchId = matchRef.id;
+
+    // Aqui notificamos ambos jogadores para abrir a view 'pvp-combat'
+    // Você pode usar outro mecanismo para isso, por exemplo firestore onSnapshot no cliente!
+    
+    await loadView('pvp-combat', { matchId: currentMatchId });
 }
 
 window.loadChallengesScreen = loadChallengesScreen;
