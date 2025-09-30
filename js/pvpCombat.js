@@ -11,29 +11,35 @@ let currentPlayerId = null;
 let opponentId = null;
 let matchData = null;
 
-export function updateCombatUI(opponentStats) {
-    const enemyHpBar = document.getElementById('right-player-hp-bar');
-    const enemyHpVal = document.getElementById('right-player-hp-val');
+export function updateCombatUI(opponentStats = window.passedParams) {
+    if (!opponentStats) return; // evita erro se não tiver parâmetros
+
+    // Atualiza HP
+    const enemyHpBar = document.getElementById('opponent-health-bar');
+    const enemyHpVal = document.getElementById('opponent-health-val');
     if (enemyHpBar && enemyHpVal) {
         const hpPercent = (opponentStats.health / opponentStats.maxHealth) * 100;
         enemyHpBar.style.width = `${Math.max(0, hpPercent)}%`;
         enemyHpVal.textContent = `${Math.max(0, Math.floor(opponentStats.health))}/${Math.floor(opponentStats.maxHealth)}`;
     }
 
-    const enemyKiBar = document.getElementById('right-player-ki-bar');
-    const enemyKiVal = document.getElementById('right-player-ki-val');
+    // Atualiza Ki
+    const enemyKiBar = document.getElementById('opponent-ki-bar');
+    const enemyKiVal = document.getElementById('opponent-ki-val');
     if (enemyKiBar && enemyKiVal) {
         const kiPercent = (opponentStats.ki / opponentStats.maxKi) * 100;
         enemyKiBar.style.width = `${Math.max(0, kiPercent)}%`;
         enemyKiVal.textContent = `${Math.max(0, Math.floor(opponentStats.ki))}/${Math.floor(opponentStats.maxKi)}`;
     }
 
-    const enemyNameVal = document.getElementById('right-player-name-val');
-    const enemyPowerVal = document.getElementById('right-player-power-val');
+    // Nome e Poder
+    const enemyNameVal = document.getElementById('opponent-name-val');
+    const enemyPowerVal = document.getElementById('opponent-power-val');
     if (enemyNameVal) enemyNameVal.textContent = opponentStats.name || '???';
     if (enemyPowerVal) enemyPowerVal.textContent = opponentStats.power;
 
-    const logElement = document.getElementById('game-log');
+    // Log
+    const logElement = document.getElementById('combat-log');
     if (logElement) {
         const div = document.createElement('div');
         div.className = 'log-message text-gray-300';
@@ -41,6 +47,7 @@ export function updateCombatUI(opponentStats) {
         logElement.prepend(div);
     }
 }
+
 
 export function loadPvpCombatScreen(params) {
     matchId = params.matchId;
