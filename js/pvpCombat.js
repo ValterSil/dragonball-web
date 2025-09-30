@@ -1,7 +1,7 @@
 // pvpCombat.js
 import { auth } from './auth.js';
 import { doc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
-import { playerStats } from './main.js';
+import { playerStats, onMatchAccepted } from './main.js';
 
 const db = window.firebaseDb;
 
@@ -11,7 +11,7 @@ let currentPlayerId = null;
 let opponentId = null;
 let matchData = null;
 
-// Atualiza a UI do combatessssssssssssssssssssssssssssssss
+// Atualiza a UI do combate
 export function updateCombatUI(opponentStats) {
     if (!opponentStats) return;
 
@@ -46,6 +46,19 @@ export function logMessage(message) {
     console.log('[PvP Log]', message);
 }
 
+// Listener de aceitação do match
+export function listenMatchAcceptance(matchIdToListen) {
+    const matchRefLocal = doc(db, "pvpMatches", matchIdToListen);
+
+    onSnapshot(matchRefLocal, snapshot => {
+        const data = snapshot.data();
+        if (data && data.status === "accepted") {
+            logMessage("✅ O outro jogador aceitou o convite!", "text-green-400");
+            onMatchAccepted(matchIdToListen);
+        }
+    });
+}
+
 // Carrega a tela PvP
 export function loadPvpCombatScreen(params) {
     if (!params || !params.matchId) return;
@@ -59,6 +72,9 @@ export function loadPvpCombatScreen(params) {
     if (screen) screen.classList.remove('hidden');
 
     logMessage(`[PvP] Carregando tela PvP para matchId=${matchId}`);
+
+    // Inicia listener de aceitação do match
+    listenMatchAcceptance(matchId);
 
     // Ouve mudanças do match
     onSnapshot(matchRef, snapshot => {
