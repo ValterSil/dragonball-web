@@ -36,7 +36,7 @@ auth.onAuthStateChanged(async (user) => {
     }
   } else {
     showAuthForms();
-    await loadView('login'); // ou view específica
+    window.location.href = 'register.html'; // redireciona para a página de registro
   }
 });
 
