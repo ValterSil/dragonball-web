@@ -1,94 +1,85 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Combate PvP</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dragon Ball Z PvP</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="css/style.css" />
 </head>
 <body class="bg-gray-900 text-white min-h-screen p-4">
 
-    <h2 class="text-2xl font-bold mb-4 text-yellow-400">Combate PvP</h2>
+<h2 class="text-2xl font-bold mb-4 text-yellow-400">Combate PvP</h2>
 
-    <div class="flex justify-between mb-4">
-        <!-- Player -->
-        <div class="w-1/2 p-2 bg-gray-800 rounded">
-            <h3 class="font-bold mb-2">Você</h3>
-            <p>HP: <span id="player-health">0</span></p>
-            <p>Ki: <span id="player-ki">0</span></p>
-            <p>Poder: <span id="player-power">0</span></p>
-        </div>
-        <!-- Oponente -->
-        <div class="w-1/2 p-2 bg-gray-800 rounded">
-            <h3 class="font-bold mb-2">Oponente</h3>
-            <p>HP: <span id="opponent-health">0</span></p>
-            <p>Ki: <span id="opponent-ki">0</span></p>
-            <p>Poder: <span id="opponent-power">0</span></p>
-        </div>
+<div class="flex justify-between mb-4">
+    <div class="w-1/2 p-2 bg-gray-800 rounded">
+        <h3 class="font-bold mb-2">Você</h3>
+        <p>HP: <span id="player-health">0</span></p>
+        <p>Ki: <span id="player-ki">0</span></p>
+        <p>Poder: <span id="player-power">0</span></p>
     </div>
-
-    <div class="mb-4">
-        <h3 class="font-bold mb-2">Técnicas</h3>
-        <div id="techniques-list" class="flex gap-2">
-            <button class="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-white" onclick="playerAttack({ name: 'Soco', power: 10 })">Soco</button>
-            <button class="bg-green-600 hover:bg-green-700 px-3 py-1 rounded text-white" onclick="playerAttack({ name: 'Chute', power: 12 })">Chute</button>
-            <button class="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-white" onclick="playerAttack({ name: 'Ki Blast', power: 15 })">Ki Blast</button>
-        </div>
+    <div class="w-1/2 p-2 bg-gray-800 rounded">
+        <h3 class="font-bold mb-2">Oponente</h3>
+        <p>HP: <span id="opponent-health">0</span></p>
+        <p>Ki: <span id="opponent-ki">0</span></p>
+        <p>Poder: <span id="opponent-power">0</span></p>
     </div>
+</div>
 
-    <div>
-        <h3 class="font-bold mb-2">Log de Combate</h3>
-        <div id="combat-log" class="p-2 bg-gray-800 rounded h-40 overflow-y-auto"></div>
+<div class="mb-4">
+    <h3 class="font-bold mb-2">Técnicas</h3>
+    <div id="techniques-list" class="flex gap-2">
+        <button class="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-white" onclick="playerAttack({ name: 'Soco', power: 10 })">Soco</button>
+        <button class="bg-green-600 hover:bg-green-700 px-3 py-1 rounded text-white" onclick="playerAttack({ name: 'Chute', power: 12 })">Chute</button>
+        <button class="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-white" onclick="playerAttack({ name: 'Ki Blast', power: 15 })">Ki Blast</button>
     </div>
+</div>
 
-    <script type="module">
-        import { playerStats, updateCombatUI, logMessage, playerAttack, loadPvpCombatScreen } from './pvpCombat.js';
+<div>
+    <h3 class="font-bold mb-2">Log de Combate</h3>
+    <div id="combat-log" class="p-2 bg-gray-800 rounded h-40 overflow-y-auto"></div>
+</div>
 
-        const playerHealthEl = document.getElementById('player-health');
-        const playerKiEl = document.getElementById('player-ki');
-        const playerPowerEl = document.getElementById('player-power');
+<script type="module">
+import { playerStats, loadPvpCombatScreen, playerAttack, updateCombatUI } from './pvpCombat.js';
 
-        const opponentHealthEl = document.getElementById('opponent-health');
-        const opponentKiEl = document.getElementById('opponent-ki');
-        const opponentPowerEl = document.getElementById('opponent-power');
+// Inicializa automaticamente se passadoParams existir
+if (window.passedParams && window.passedParams.matchId) {
+    console.log('[LOG PvP] Iniciando PvP com matchId:', window.passedParams.matchId);
+    loadPvpCombatScreen(window.passedParams);
+}
 
-        function refreshStats(opponentStats) {
-            playerHealthEl.textContent = playerStats.health;
-            playerKiEl.textContent = playerStats.ki;
-            playerPowerEl.textContent = playerStats.power;
+// Atualiza a UI do combate
+window.updateCombatUI = function(opponentStats) {
+    // Atualiza stats do player
+    document.getElementById('player-health').textContent = playerStats.health;
+    document.getElementById('player-ki').textContent = playerStats.ki;
+    document.getElementById('player-power').textContent = playerStats.power;
 
-            opponentHealthEl.textContent = opponentStats.health;
-            opponentKiEl.textContent = opponentStats.ki;
-            opponentPowerEl.textContent = opponentStats.power;
-        }
+    // Atualiza stats do oponente
+    if (opponentStats) {
+        document.getElementById('opponent-health').textContent = opponentStats.health;
+        document.getElementById('opponent-ki').textContent = opponentStats.ki;
+        document.getElementById('opponent-power').textContent = opponentStats.power;
+    }
+};
 
-        window.updateCombatUI = function(opponentStats) {
-            refreshStats(opponentStats);
+// Log de combate
+window.logMessage = function(message) {
+    console.log('[LOG PvP]', message);
+    const logDiv = document.getElementById('combat-log');
+    const p = document.createElement('p');
+    p.textContent = message;
+    logDiv.appendChild(p);
+    logDiv.scrollTop = logDiv.scrollHeight;
+};
 
-            const logDiv = document.getElementById('combat-log');
-            logDiv.innerHTML = logDiv.innerHTML || '';
-        };
-
-        window.logMessage = function(message) {
-            const logDiv = document.getElementById('combat-log');
-            const p = document.createElement('p');
-            p.textContent = message;
-            logDiv.appendChild(p);
-            logDiv.scrollTop = logDiv.scrollHeight;
-            console.log("[LOG PvP]", message);
-        };
-
-        window.playerAttack = async function(technique) {
-            if (!technique) return;
-            logMessage(`Você usou ${technique.name}!`);
-            await playerAttack(technique);
-        };
-
-        // Simulação: inicializa PvP com log
-        window.passedParams = { matchId: 'ID_DA_PARTIDA' };
-        logMessage("Chamando loadPvpCombatScreen com matchId: ID_DA_PARTIDA");
-        loadPvpCombatScreen(window.passedParams);
-    </script>
-
+// Ataque do player
+window.playerAttack = async function(technique) {
+    if (!technique) return;
+    logMessage(`Você usou ${technique.name}!`);
+    await playerAttack(technique);
+};
+</script>
 </body>
 </html>
