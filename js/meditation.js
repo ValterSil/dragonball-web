@@ -71,6 +71,8 @@ export async function meditate() {
 
     await savePlayerToFirestore(); // 🔥 Agora salva no Firestore também
 
+
+
     logMessage(`✅ Meditação completa! Você ganhou ${xpGain} XP (Bônus: ${(playerStats.xpMultiplier - 1.0) * 100}%)!`, 'text-green-400');
     if (levelsGained > 0) {
         logMessage(`💥 VOCÊ SUBIU PARA o NÍVEL ${playerStats.level}! Ganhou ${levelsGained * POINTS_PER_LEVEL} Pontos de Atributo!`, 'text-red-500 font-bold');
