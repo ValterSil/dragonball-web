@@ -43,7 +43,7 @@ async function loadPlayerData() {
   const user = auth.currentUser;
   if (!user) return null;
 
-  const userDoc = doc(db, 'players', user.uid);
+  const userDoc = doc(db, 'users', user.uid);
   const docSnap = await getDoc(userDoc);
   if (docSnap.exists()) {
     return docSnap.data();
