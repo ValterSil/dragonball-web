@@ -4,7 +4,7 @@ import { doc, collection, getDocs, query, where, updateDoc, setDoc, arrayUnion, 
 import { loadView } from './main.js';
 import { playerStats } from './main.js';
 
-const db = window.firebaseDb;
+
 const currentUserId = auth.currentUser.uid;
 
 export async function loadChallengesScreen() {
