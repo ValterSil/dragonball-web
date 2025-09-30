@@ -1,5 +1,6 @@
 // mestreKame.js
 import { playerStats, logMessage, updateUI, saveLocalState, RACE_DATA, UPGRADE_DATA, calculateXpMultiplier, getTechById, loadView } from './main.js';
+import { savePlayerToFirestore } from './playerService.js'; // 🔥 asdasdNovo import
 
 // Elementos da UI do Mestre Kame (precisam existir na view mestreKame.html)
 let techniquesListDiv;
@@ -121,6 +122,8 @@ export async function learnTechnique(techId) {
     logMessage(`🎉 Você aprendeu a técnica ${tech.name}!`, 'text-green-500 font-bold');
 
     saveLocalState(); 
+
+    await savePlayerToFirestore(); // 🔥 Agora salva no Firestore também
     
     updateUI();
     renderTechniques(); // Atualiza a lista de técnicas no menu
