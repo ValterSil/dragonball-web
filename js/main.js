@@ -2,6 +2,8 @@
 
 // --- Configurações e Estado do Jogo ---
 
+import { onMatchAccepted } from './pvpCombat.js';
+
 export let playerStats = {
   name: null,
   race: null,
