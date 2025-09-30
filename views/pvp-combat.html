@@ -22,7 +22,7 @@
 
     <!-- Oponente -->
     <div class="enemy-info flex flex-col items-center bg-gray-700 rounded-lg p-4 w-2/5 relative">
-      <img id="enemy-combat-img" src="https://via.placeholder.com/64" alt="Oponente" class="w-16 h-16 rounded-full border-2 border-red-500 mb-2" />
+      <img id="enemy-combat-img" src="imagens/player/placeholder.png" alt="Oponente" class="w-16 h-16 rounded-full border-2 border-red-500 mb-2" />
       <p class="text-lg font-bold text-red-400" id="enemy-combat-name">-</p>
       <p class="text-sm text-gray-300" id="enemy-combat-level">Nível -</p>
       <div class="w-full bg-gray-600 rounded-full h-3 mt-2">
@@ -50,23 +50,3 @@
     <div id="combat-log" class="p-2 bg-gray-800 rounded h-40 overflow-y-auto"></div>
   </div>
 </div>
-
-<script type="module">
-  import { loadPvpCombatScreen, playerAttack, logMessage, updateCombatUI } from '../js/pvpCombat.js';
-
-  if (window.passedParams?.matchId) {
-    document.getElementById('pvp-combat-screen').classList.remove('hidden');
-    loadPvpCombatScreen(window.passedParams);
-    logMessage('[PvP] Tela de combate carregada');
-  }
-
-  window.playerAttack = async function(technique) {
-    if (!technique) return;
-    logMessage(`Você usou ${technique.name}!`);
-    await playerAttack(technique);
-  };
-
-  window.updateCombatUI = function(playerData, enemyData) {
-    updateCombatUI(playerData, enemyData);
-  };
-</script>
