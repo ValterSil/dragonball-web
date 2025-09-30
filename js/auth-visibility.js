@@ -1,6 +1,6 @@
 import { loadView, playerStats, updateUI } from './main.js';
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
-import { auth, db } from './auth.js'; // ✅ pega direto do auth.js
+import { auth, db } from './auth.js';
 
 const registerForm = document.getElementById('register-form');
 const loginForm = document.getElementById('login-form');
