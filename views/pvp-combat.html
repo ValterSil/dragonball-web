@@ -1,9 +1,8 @@
 <div id="pvp-combat-screen" class="view-content hidden">
   <button class="back-button" onclick="window.loadView('combat-selection')">← Voltar</button>
-  <h3 class="view-title text-yellow-400">Combate PvP</h3>
+  <h3 class="view-title">Combate PvP</h3>
 
   <div class="flex justify-around mb-4">
-    <!-- Jogador -->
     <div class="player-info flex flex-col items-center bg-gray-700 rounded-lg p-4 w-2/5 relative">
       <img id="player-combat-img" src="imagens/player/goku-player.png" alt="Jogador" class="w-16 h-16 rounded-full border-2 border-blue-500 mb-2" />
       <p class="text-lg font-bold text-blue-400" id="player-combat-name">-</p>
@@ -20,7 +19,6 @@
 
     <span class="text-4xl font-extrabold text-yellow-400 mx-4">X</span>
 
-    <!-- Oponente -->
     <div class="enemy-info flex flex-col items-center bg-gray-700 rounded-lg p-4 w-2/5 relative">
       <img id="enemy-combat-img" src="imagens/player/placeholder.png" alt="Oponente" class="w-16 h-16 rounded-full border-2 border-red-500 mb-2" />
       <p class="text-lg font-bold text-red-400" id="enemy-combat-name">-</p>
@@ -36,15 +34,11 @@
     </div>
   </div>
 
-  <!-- Técnicas -->
   <div class="mb-4 flex flex-col items-center">
     <h4 class="font-bold mb-2">Técnicas</h4>
-    <div id="techniques-list" class="flex gap-2">
-      <!-- Botões dinâmicos gerados pelo JS -->
-    </div>
+    <div id="techniques-list" class="flex gap-2"></div>
   </div>
 
-  <!-- Log de Combate -->
   <div>
     <h4 class="font-bold mb-2">Log de Combate</h4>
     <div id="combat-log" class="p-2 bg-gray-800 rounded h-40 overflow-y-auto"></div>
