@@ -214,6 +214,8 @@ export async function buyUpgrade(upgradeId, cost) {
     logMessage(`✨ Você comprou o nível ${playerStats.upgrades[upgradeId]} de ${upgrade.name}! Bônus XP total agora é +${totalBonus}%!`, 'text-purple-400 font-bold');
 
     saveLocalState(); 
+
+    await savePlayerToFirestore(); // 🔥 Agora salva no Firestore também
     
     updateUI();
     renderUpgrades(); // Atualiza a lista de upgrades no menu
