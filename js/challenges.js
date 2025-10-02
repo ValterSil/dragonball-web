@@ -3,7 +3,7 @@ import { doc, collection, getDocs, getDoc, query, where, updateDoc, setDoc, arra
 import { loadView, playerStats } from './main.js';
 import { activateMatch } from './pvpCombat.js';
 
-const ONLINE_TIMEOUT_MINUTES = 5; // Intervalo para considerar jogador online
+const ONLINE_TIMEOUT_MINUTES = 5;
 
 export async function loadChallengesScreen() {
   const user = auth.currentUser;
@@ -15,7 +15,6 @@ export async function loadChallengesScreen() {
     <h2 class="text-xl font-bold text-yellow-400 mb-4">Jogadores Online</h2>
     <div id="players-list"></div>
   `;
-  // Atualiza lastActive do jogador atual para manter online
   try {
     const userRef = doc(db, "users", currentUserId);
     await updateDoc(userRef, { lastActive: Timestamp.now() });
@@ -30,7 +29,7 @@ export async function loadChallengesScreen() {
   try {
     const snapshot = await getDocs(q);
     const listDiv = document.getElementById('players-list');
-    listDiv.innerHTML = ''; // Limpa lista existente
+    listDiv.innerHTML = '';
 
     snapshot.forEach(docSnap => {
       if (docSnap.id !== currentUserId) {
@@ -39,7 +38,6 @@ export async function loadChallengesScreen() {
         btn.textContent = player.characterName || "Jogador";
         btn.className = "block w-full mb-2 p-2 bg-blue-600 hover:bg-blue-700 text-white rounded";
         btn.onclick = () => invitePlayer(docSnap.id, player.characterName || "Jogador");
-        
         listDiv.appendChild(btn);
       }
     });
@@ -62,7 +60,6 @@ async function invitePlayer(opponentId, opponentName) {
   } catch {
     await setDoc(inviteRef, { invites: [{ from: currentUserId, timestamp: new Date() }] });
   }
-
   alert(`Convite enviado para ${opponentName}`);
 }
 
@@ -88,7 +85,6 @@ function listenForInvites(currentUserId) {
 
 export async function startPvpMatch(player1Id, player2Id) {
   const matchRef = doc(collection(db, "pvpMatches"));
-
   const player1Doc = await getDoc(doc(db, 'users', player1Id));
   const player2Doc = await getDoc(doc(db, 'users', player2Id));
 
@@ -100,16 +96,22 @@ export async function startPvpMatch(player1Id, player2Id) {
   const player1Data = player1Doc.data();
   const player2Data = player2Doc.data();
 
+  // 🔥 ADICIONADO: Fallback para evitar o erro de 'undefined'
+  const p1MaxHealth = player1Data.maxHealth || 100;
+  const p1MaxKi = player1Data.maxKi || 100;
+  const p2MaxHealth = player2Data.maxHealth || 100;
+  const p2MaxKi = player2Data.maxKi || 100;
+
   await setDoc(matchRef, {
     player1: { 
         uid: player1Id, 
         name: player1Data.characterName,
-        level: player1Data.level, // 🔥 ADICIONADO: Nível do jogador 1
+        level: player1Data.level,
         stats: {
-            health: player1Data.maxHealth,
-            maxHealth: player1Data.maxHealth,
-            ki: player1Data.maxKi,
-            maxKi: player1Data.maxKi,
+            health: p1MaxHealth,
+            maxHealth: p1MaxHealth,
+            ki: p1MaxKi,
+            maxKi: p1MaxKi,
             power: player1Data.power,
             defense: player1Data.defense
         }
@@ -117,12 +119,12 @@ export async function startPvpMatch(player1Id, player2Id) {
     player2: { 
         uid: player2Id, 
         name: player2Data.characterName,
-        level: player2Data.level, // 🔥 ADICIONADO: Nível do jogador 2
+        level: player2Data.level,
         stats: {
-            health: player2Data.maxHealth,
-            maxHealth: player2Data.maxHealth,
-            ki: player2Data.maxKi,
-            maxKi: player2Data.maxKi,
+            health: p2MaxHealth,
+            maxHealth: p2MaxHealth,
+            ki: p2MaxKi,
+            maxKi: p2MaxKi,
             power: player2Data.power,
             defense: player2Data.defense
         }
@@ -133,7 +135,6 @@ export async function startPvpMatch(player1Id, player2Id) {
     updatedAt: new Date(),
     log: []
   });
-
   return matchRef.id;
 }
 
