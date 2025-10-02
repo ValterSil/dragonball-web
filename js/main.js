@@ -132,11 +132,11 @@ export async function loadView(viewName, viewParams = {}) {
     logMessage('Você não pode sair enquanto estiver em combate!', 'text-red-500');
     return;
   }
-  if (currentView === viewName && viewName !== 'pvp-combat') { // pvp-combat pode precisar recarregar
+  if (currentView === viewName && viewName !== 'pvp-combat') {
     return;
   }
   currentView = viewName;
-  window.currentView = viewName; // Disponibiliza globalmente
+  window.currentView = viewName;
 
   try {
     const response = await fetch(`views/${viewName}.html`);
@@ -151,7 +151,7 @@ export async function loadView(viewName, viewParams = {}) {
         creationModule.initCharacterCreationScreen();
         break;
       case 'status':
-        updateUI(); // A UI já é atualizada, mas aqui garantimos a atualização da tela de status
+        updateUI();
         break;
       case 'meditation':
         const meditationModule = await import('./meditation.js');
@@ -282,7 +282,6 @@ export function updateUI() {
   const kiBar = document.getElementById('left-player-ki-bar');
   if (kiBar) kiBar.style.width = `${Math.max(0, (ki / maxKi) * 100)}%`;
 
-  // 🔥 ATUALIZAÇÃO: Popula a tela de Status também
   if (currentView === 'status') {
     safeUpdate('stats-name-display', name);
     safeUpdate('stats-race-display', playerStats.race || '---');
@@ -316,5 +315,25 @@ export async function initGame() {
   listenForActiveMatches();
 }
 
+// 🔥 ADICIONADO: Função que faltava
+export function disableActions(disabled) {
+  document.querySelectorAll('.action-btn, #create-character-button, .menu-link, #meditate-button').forEach(
+    (element) => {
+      if (element.tagName === 'A' || element.classList.contains('menu-link')) {
+        if (disabled) {
+          element.style.pointerEvents = 'none';
+          element.classList.add('opacity-50', 'cursor-not-allowed');
+        } else {
+          element.style.pointerEvents = 'auto';
+          element.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+      } else {
+        element.disabled = disabled;
+      }
+    }
+  );
+}
+
 window.onload = initGame;
 window.loadView = loadView;
+window.disableActions = disableActions;
