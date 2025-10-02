@@ -9,10 +9,6 @@ import { playerStats } from './main.js';
 export async function savePlayerToFirestore() {
     try {
         const user = auth.currentUser;
-            console.log("[DEBUG] Tentando salvar player...");
-            console.log("[DEBUG] Usuário logado:", user ? user.email : "Nenhum");
-            console.log("[DEBUG] Stats:", playerStats);
-        
         if (!user) throw new Error("Usuário não autenticado");
 
         const userDoc = doc(db, "users", user.uid);
@@ -28,11 +24,13 @@ export async function savePlayerToFirestore() {
             upgrades: playerStats.upgrades,
             learnedTechniques: playerStats.learnedTechniques,
             health: playerStats.health,
+            maxHealth: playerStats.maxHealth, // 🔥 ADICIONADO
             ki: playerStats.ki,
+            maxKi: playerStats.maxKi,       // 🔥 ADICIONADO
             power: playerStats.power,
             defense: playerStats.defense,
             lastUpdated: new Date()
-        }, { merge: true }); // merge evita sobrescrever tudo
+        }, { merge: true });
 
         console.log("🔥 Personagem atualizado no Firestore!");
     } catch (error) {
