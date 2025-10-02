@@ -1,5 +1,5 @@
 import { auth, db } from './auth.js';
-import { doc, collection, getDocs, query, where, updateDoc, setDoc, arrayUnion, onSnapshot, Timestamp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+import { doc, collection, getDocs, getDoc, query, where, updateDoc, setDoc, arrayUnion, onSnapshot, Timestamp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 import { loadView, playerStats } from './main.js';
 import { activateMatch } from './pvpCombat.js';
 
