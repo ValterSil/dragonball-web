@@ -1,4 +1,4 @@
-import { loadView, playerStats, updateUI } from './main.js';
+import { loadView, playerStats, updateUI, updateCalculatedStats } from './main.js';
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 import { auth, db } from './auth.js';
 
@@ -29,6 +29,8 @@ auth.onAuthStateChanged(async (user) => {
     const data = await loadPlayerData();
     if (data) {
       Object.assign(playerStats, data);
+      // 🔥 CORREÇÃO CRÍTICA: Recalcula stats derivados após carregar do Firebase
+      updateCalculatedStats(); 
       updateUI();
       await loadView('status');
     } else {
