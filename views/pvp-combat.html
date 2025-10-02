@@ -1,46 +1,57 @@
-<div id="pvp-combat-screen" class="view-content hidden">
-  <button class="back-button" onclick="window.loadView('combat-selection')">← Voltar</button>
-  <h3 class="view-title">Combate PvP</h3>
+<div id="pvp-combat-screen" class="view-content p-4 bg-gray-900 text-white">
+    <button class="back-button" onclick="window.endCombat('flee')">← Sair da Partida</button>
+    <h3 class="view-title text-yellow-400">Duelo de Titãs</h3>
 
-  <div class="flex justify-around mb-4">
-    <div class="player-info flex flex-col items-center bg-gray-700 rounded-lg p-4 w-2/5 relative">
-      <img id="player-combat-img" src="imagens/player/goku-player.png" alt="Jogador" class="w-16 h-16 rounded-full border-2 border-blue-500 mb-2" />
-      <p class="text-lg font-bold text-blue-400" id="player-combat-name">-</p>
-      <p class="text-sm text-gray-300" id="player-combat-level">Nível -</p>
-      <div class="w-full bg-gray-600 rounded-full h-3 mt-2">
-        <div id="player-combat-hp-bar" class="bg-green-500 h-3 rounded-full transition-all duration-300" style="width: 100%;"></div>
-      </div>
-      <p class="text-xs text-gray-300 mt-1">HP <span id="player-combat-hp-val">0/0</span></p>
-      <div class="w-full bg-gray-600 rounded-full h-3 mt-2">
-        <div id="player-combat-ki-bar" class="bg-blue-500 h-3 rounded-full transition-all duration-300" style="width: 100%;"></div>
-      </div>
-      <p class="text-xs text-gray-300 mt-1">KI <span id="player-combat-ki-val">0/0</span></p>
+    <div class="combat-display w-full max-w-2xl bg-gray-800 p-6 rounded-lg shadow-xl flex flex-col items-center justify-center space-y-6">
+        
+        <div class="flex justify-around items-center w-full">
+            
+            <div class="player-info flex flex-col items-center p-4 bg-gray-700 rounded-lg shadow-md w-2/5 relative">
+                <div id="player-winner-crown" class="winner-crown hidden">👑</div>
+                <img id="player-combat-img" src="imagens/player/goku-player.png" alt="Player" class="w-16 h-16 rounded-full border-2 border-blue-500 mb-2">
+                <div id="player-battle-result" class="absolute bottom-1 left-1/2 transform -translate-x-1/2 text-red-600 font-bold text-lg hidden"></div>
+                <p class="text-lg font-bold text-blue-400" id="player-combat-name">-</p>
+                <p class="text-sm text-gray-300" id="player-combat-level">Nível -</p>
+                <div class="w-full bg-gray-600 rounded-full h-3 mt-2">
+                    <div id="player-combat-hp-bar" class="bg-green-500 h-3 rounded-full transition-all duration-300" style="width: 100%;"></div>
+                </div>
+                <p class="text-xs text-gray-300 mt-1">Vida <span id="player-combat-hp-val">--/--</span></p>
+                <div class="w-full bg-gray-600 rounded-full h-3 mt-1">
+                    <div id="player-combat-ki-bar" class="bg-blue-500 h-3 rounded-full transition-all duration-300" style="width: 100%;"></div>
+                </div>
+                <p class="text-xs text-gray-300 mt-1">KI <span id="player-combat-ki-val">--/--</span></p>
+            </div>
+
+            <span class="text-4xl font-extrabold text-yellow-400 mx-4">X</span>
+
+            <div class="enemy-info flex flex-col items-center p-4 bg-gray-700 rounded-lg shadow-md w-2/5 relative">
+                <div id="enemy-winner-crown" class="winner-crown hidden">👑</div>
+                <img id="enemy-combat-img" src="imagens/player/placeholder.png" alt="Opponent" class="w-16 h-16 rounded-full border-2 border-red-500 mb-2">
+                <div id="enemy-battle-result" class="absolute bottom-1 left-1/2 transform -translate-x-1/2 text-red-600 font-bold text-lg hidden"></div>
+                <p class="text-lg font-bold text-red-400" id="enemy-combat-name">-</p>
+                <p class="text-sm text-gray-300" id="enemy-combat-level">Nível -</p>
+                <div class="w-full bg-gray-600 rounded-full h-3 mt-2">
+                    <div id="enemy-combat-hp-bar" class="bg-red-500 h-3 rounded-full transition-all duration-300" style="width: 100%;"></div>
+                </div>
+                <p class="text-xs text-gray-300 mt-1">Vida <span id="enemy-combat-hp-val">--/--</span></p>
+                <div class="w-full bg-gray-600 rounded-full h-3 mt-2">
+                    <div id="enemy-combat-ki-bar" class="bg-blue-500 h-3 rounded-full transition-all duration-300" style="width: 100%;"></div>
+                </div>
+                <p class="text-xs text-gray-300 mt-1">KI <span id="enemy-combat-ki-val">--/--</span></p>
+            </div>
+            
+        </div>
+
+        <div class="w-full max-w-lg mt-6 flex flex-col items-center space-y-3">
+             <h4 class="font-bold mb-2 text-yellow-300">Seu Turno! Escolha uma Técnica:</h4>
+             <div id="pvp-techniques-list" class="flex gap-2 flex-wrap justify-center">
+                </div>
+             <div id="turn-indicator" class="text-center text-gray-400 mt-2"></div>
+        </div>
+
+        <div class="text-sm text-gray-400 mt-4">Log de Combate:</div>
+        <div id="pvp-combat-log" class="w-full max-w-md h-24 bg-gray-900 p-2 rounded-lg overflow-y-auto text-xs text-gray-300">
+            <p>Aguardando início do combate...</p>
+        </div>
     </div>
-
-    <span class="text-4xl font-extrabold text-yellow-400 mx-4">X</span>
-
-    <div class="enemy-info flex flex-col items-center bg-gray-700 rounded-lg p-4 w-2/5 relative">
-      <img id="enemy-combat-img" src="imagens/player/placeholder.png" alt="Oponente" class="w-16 h-16 rounded-full border-2 border-red-500 mb-2" />
-      <p class="text-lg font-bold text-red-400" id="enemy-combat-name">-</p>
-      <p class="text-sm text-gray-300" id="enemy-combat-level">Nível -</p>
-      <div class="w-full bg-gray-600 rounded-full h-3 mt-2">
-        <div id="enemy-combat-hp-bar" class="bg-red-500 h-3 rounded-full transition-all duration-300" style="width: 100%;"></div>
-      </div>
-      <p class="text-xs text-gray-300 mt-1">HP <span id="enemy-combat-hp-val">0/0</span></p>
-      <div class="w-full bg-gray-600 rounded-full h-3 mt-2">
-        <div id="enemy-combat-ki-bar" class="bg-blue-500 h-3 rounded-full transition-all duration-300" style="width: 100%;"></div>
-      </div>
-      <p class="text-xs text-gray-300 mt-1">KI <span id="enemy-combat-ki-val">0/0</span></p>
-    </div>
-  </div>
-
-  <div class="mb-4 flex flex-col items-center">
-    <h4 class="font-bold mb-2">Técnicas</h4>
-    <div id="techniques-list" class="flex gap-2"></div>
-  </div>
-
-  <div>
-    <h4 class="font-bold mb-2">Log de Combate</h4>
-    <div id="combat-log" class="p-2 bg-gray-800 rounded h-40 overflow-y-auto"></div>
-  </div>
 </div>
