@@ -12,18 +12,15 @@
 
   <div id="game-wrapper" class="w-full max-w-7xl bg-gray-800 border-2 border-blue-600 rounded-lg shadow-2xl overflow-hidden flex flex-col">
 
-    <!-- HEADER -->
     <div id="game-header" class="relative bg-gradient-to-r from-blue-700 to-indigo-800 p-2 border-b-2 border-yellow-500 text-center">
       <h1 class="text-3xl font-extrabold text-yellow-400">Dragon Ball Z RPG On-Line</h1>
       <div class="text-sm text-gray-300 mt-1">Home : Diário : LOJA : HALL</div>
     </div>
 
-    <!-- MAIN CONTENT -->
     <div class="flex flex-col md:flex-row flex-grow">
-      <!-- COLUNA ESQUERDA -->
       <div id="left-sidebar" class="w-full md:w-1/4 bg-gray-700 p-4 border-r border-yellow-500 overflow-y-auto flex-shrink-0">
         <div class="p-2 bg-gray-800 rounded mb-4">
-          <h2 id="left-player-name-title" class="text-lg font-bold text-blue-400 border-b border-blue-500 pb-1">Valter</h2>
+          <h2 id="left-player-name-title" class="text-lg font-bold text-blue-400 border-b border-blue-500 pb-1">-</h2>
           <div id="player-main-stats" class="text-sm mt-2 space-y-1">
             <p>Nome: <span id="left-player-name-val">-</span></p>
             <p>Raça: <span id="left-player-race-val">-</span></p>
@@ -42,7 +39,6 @@
           </div>
         </div>
 
-        <!-- MENU -->
         <div id="left-nav-menu" class="space-y-2 mt-4">
           <a href="#" onclick="window.loadView('status'); return false;" class="menu-link"><span class="text-2xl mr-2">👤</span> Status</a>
           <a href="#" onclick="window.loadView('meditation'); return false;" class="menu-link"><span class="text-2xl mr-2">🧘</span> Meditação</a>
@@ -52,14 +48,11 @@
         </div>
       </div>
 
-      <!-- CONTEÚDO PRINCIPAL -->
       <div id="main-content-area" class="flex-grow bg-gray-800 p-4 overflow-y-auto">
         <p id="loading-message" class="text-center text-gray-400 mt-8">Carregando conteúdo principal...</p>
 
-        <!-- Mensagem geral -->
         <p id="auth-message" class="text-center mt-4 mb-6"></p>
 
-        <!-- Formulário de registro -->
         <form id="register-form" class="max-w-sm mx-auto p-4 bg-gray-700 rounded-lg" style="display:none;">
           <h2 class="text-xl text-yellow-400 font-bold mb-4">Cadastro</h2>
           <label for="register-email" class="block text-gray-300 mb-1">Email</label>
@@ -69,7 +62,6 @@
           <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded">Cadastrar</button>
         </form>
 
-        <!-- Formulário de login -->
         <form id="login-form" class="max-w-sm mx-auto mt-6 p-4 bg-gray-700 rounded-lg" style="display:none;">
           <h2 class="text-xl text-green-400 font-bold mb-4">Login</h2>
           <label for="login-email" class="block text-gray-300 mb-1">Email</label>
@@ -79,13 +71,11 @@
           <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded">Entrar</button>
         </form>
 
-        <!-- Botão logout -->
         <button id="logout-button" class="w-full max-w-sm mx-auto mt-6 p-2 bg-yellow-600 hover:bg-yellow-700 text-black rounded" style="display:none;">
           Sair
         </button>
       </div>
 
-      <!-- COLUNA DIREITA -->
       <div id="right-sidebar" class="w-full md:w-1/4 bg-gray-700 p-4 border-l border-yellow-500 overflow-y-auto flex-shrink-0">
         <h2 class="text-lg font-bold text-green-400 border-b border-green-500 pb-1 mb-4">Saia na frente com o PASS</h2>
         <div id="right-nav-menu" class="space-y-2">
@@ -99,12 +89,10 @@
     </div>
   </div>
 
-  <!-- LOG -->
   <div id="game-log" class="h-32 overflow-y-auto bg-black text-green-400 p-3 text-sm border-t-2 border-yellow-500 flex-shrink-0">
     <div class="log-message text-yellow-500 font-bold">Iniciando o RPG...</div>
   </div>
 
-  <!-- Scripts -->
   <script type="module" src="js/auth.js"></script>
   <script type="module" src="js/auth-visibility.js"></script>
   <script type="module" src="js/main.js"></script>
@@ -118,6 +106,5 @@
   <script type="module" src="js/mestreKame.js"></script>
   <script type="module" src="js/challenges.js"></script>
   
-
 </body>
 </html>
