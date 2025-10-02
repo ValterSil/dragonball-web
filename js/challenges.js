@@ -76,23 +76,19 @@ function listenForInvites(currentUserId) {
     if (invite.from !== currentUserId) { 
       const accept = confirm(`Você recebeu um convite de duelo de um jogador! Aceitar?`);
       if (accept) {
-        // A lógica agora é mais simples: cria a partida e a ativa.
-        // O listener global em pvpCombat.js cuidará de redirecionar AMBOS os jogadores.
         const matchId = await startPvpMatch(currentUserId, invite.from);
-        await activateMatch(matchId);
+        if (matchId) {
+            await activateMatch(matchId);
+        }
       }
-      // Limpa o convite independentemente da resposta
       await updateDoc(inviteRef, { invites: [] }).catch(() => {});
     }
   });
 }
 
-let currentMatchId = null;
-
 export async function startPvpMatch(player1Id, player2Id) {
   const matchRef = doc(collection(db, "pvpMatches"));
 
-  // Busca os dados mais recentes dos jogadores para iniciar a partida
   const player1Doc = await getDoc(doc(db, 'users', player1Id));
   const player2Doc = await getDoc(doc(db, 'users', player2Id));
 
@@ -108,41 +104,37 @@ export async function startPvpMatch(player1Id, player2Id) {
     player1: { 
         uid: player1Id, 
         name: player1Data.characterName,
+        level: player1Data.level, // 🔥 ADICIONADO: Nível do jogador 1
         stats: {
-            health: player1Data.health,
-            maxHealth: player1Data.maxHealth || 100,
-            ki: player1Data.ki,
-            maxKi: player1Data.maxKi || 100,
+            health: player1Data.maxHealth,
+            maxHealth: player1Data.maxHealth,
+            ki: player1Data.maxKi,
+            maxKi: player1Data.maxKi,
             power: player1Data.power,
             defense: player1Data.defense
-        },
-        lastActionAt: new Date() 
+        }
     },
     player2: { 
         uid: player2Id, 
         name: player2Data.characterName,
+        level: player2Data.level, // 🔥 ADICIONADO: Nível do jogador 2
         stats: {
-            health: player2Data.health,
-            maxHealth: player2Data.maxHealth || 100,
-            ki: player2Data.ki,
-            maxKi: player2Data.maxKi || 100,
+            health: player2Data.maxHealth,
+            maxHealth: player2Data.maxHealth,
+            ki: player2Data.maxKi,
+            maxKi: player2Data.maxKi,
             power: player2Data.power,
             defense: player2Data.defense
-        },
-        lastActionAt: new Date() 
+        }
     },
     turn: player1Id,
-    status: "pending", // Inicia como pendente
+    status: "pending",
     createdAt: new Date(),
     updatedAt: new Date(),
     log: []
   });
 
-  currentMatchId = matchRef.id;
-  // A função listenMatchStart foi removida daqui para centralizar a lógica no listener global.
-  return currentMatchId;
+  return matchRef.id;
 }
-
-// A função listenMatchStart foi completamente removida deste arquivo.
 
 window.loadChallengesScreen = loadChallengesScreen;
